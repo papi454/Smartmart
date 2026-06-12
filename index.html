@@ -3,175 +3,321 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>MiniMart POS System</title>
+<title>MiniMart POS</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2316a34a'/><text y='.9em' font-size='75' x='12'>🛒</text></svg>"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --green:#16a34a;--green-dark:#15803d;--green-light:#dcfce7;--green-muted:#bbf7d0;
   --sidebar-bg:#111827;--sidebar-text:#9ca3af;
-  --bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;
+  --bg:#f1f5f9;--card:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;
   --red:#ef4444;--amber:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;
-  --shadow:0 1px 3px rgba(0,0,0,.08);--radius:8px;--radius-lg:12px;
+  --radius:8px;--radius-lg:12px;
+  --sidebar-w:220px;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px}
 #app{display:flex;width:100%;height:100vh}
-.sidebar{width:220px;min-width:220px;background:var(--sidebar-bg);display:flex;flex-direction:column;overflow-y:auto}
-.sidebar-logo{padding:20px 16px;border-bottom:1px solid #1f2937;display:flex;align-items:center;gap:10px}
-.logo-icon{width:36px;height:36px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
-.logo-text{color:#fff;font-size:15px;font-weight:600}
-.logo-sub{color:var(--sidebar-text);font-size:11px}
-.sidebar-nav{flex:1;padding:12px 8px}
-.nav-label{font-size:10px;font-weight:600;color:#4b5563;text-transform:uppercase;letter-spacing:.8px;padding:4px 10px;margin-bottom:4px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;cursor:pointer;color:var(--sidebar-text);font-size:13px;font-weight:500;transition:.15s}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--sidebar-bg);display:flex;flex-direction:column;overflow-y:auto;transition:width .25s,min-width .25s;position:relative;z-index:100}
+.sidebar.collapsed{width:56px;min-width:56px}
+.sidebar.collapsed .nav-label,.sidebar.collapsed .nav-text,.sidebar.collapsed .nav-badge,.sidebar.collapsed .logo-text,.sidebar.collapsed .logo-sub,.sidebar.collapsed .user-info{display:none}
+.sidebar.collapsed .nav-item{justify-content:center;padding:9px 0}
+.sidebar.collapsed .sidebar-logo{padding:16px 10px;justify-content:center}
+.sidebar.collapsed .sidebar-footer{padding:10px}
+.sidebar.collapsed .user-card{justify-content:center}
+.sidebar-logo{padding:16px;border-bottom:1px solid #1f2937;display:flex;align-items:center;gap:10px;transition:.25s}
+.logo-icon{width:34px;height:34px;min-width:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff}
+.logo-text{color:#fff;font-size:15px;font-weight:700;white-space:nowrap}
+.logo-sub{color:var(--sidebar-text);font-size:10px;white-space:nowrap}
+.sidebar-nav{flex:1;padding:10px 6px}
+.nav-label{font-size:10px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.8px;padding:4px 8px;margin:8px 0 2px;white-space:nowrap}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:7px;cursor:pointer;color:var(--sidebar-text);font-size:13px;font-weight:500;transition:.15s;position:relative;white-space:nowrap}
 .nav-item:hover{background:#1f2937;color:#d1d5db}
 .nav-item.active{background:#14532d;color:#86efac}
-.nav-item .ti{font-size:16px;width:20px;text-align:center}
-.nav-badge{margin-left:auto;background:#ef4444;color:#fff;font-size:10px;border-radius:10px;padding:1px 6px;font-weight:600}
-.sidebar-footer{padding:12px 16px;border-top:1px solid #1f2937}
+.nav-item .ti{font-size:17px;min-width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:#ef4444;color:#fff;font-size:10px;border-radius:10px;padding:1px 6px;font-weight:700}
+.sidebar-footer{padding:10px 12px;border-top:1px solid #1f2937}
 .user-card{display:flex;align-items:center;gap:10px}
-.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.topbar h1{font-size:18px;font-weight:600}
-.content{flex:1;overflow-y:auto;padding:24px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
-.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.card-title{font-size:15px;font-weight:600}
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;display:flex;flex-direction:column;gap:10px}
-.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.user-avatar{width:30px;height:30px;min-width:30px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+.user-info p{color:#e5e7eb;font-size:13px;font-weight:600}
+.user-info span{color:#6b7280;font-size:11px}
+.collapse-btn{position:absolute;top:18px;right:-12px;width:24px;height:24px;background:var(--card);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:101;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.collapse-btn .ti{font-size:13px;color:var(--muted);transition:transform .25s}
+.sidebar.collapsed .collapse-btn .ti{transform:rotate(180deg)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar h1{font-size:17px;font-weight:700}
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:14px;font-weight:700}
+.card-subtitle{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:8px}
+.stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px}
 .stat-icon.green{background:#dcfce7;color:#16a34a}
 .stat-icon.blue{background:#dbeafe;color:#2563eb}
 .stat-icon.amber{background:#fef3c7;color:#d97706}
 .stat-icon.purple{background:#ede9fe;color:#7c3aed}
 .stat-icon.red{background:#fee2e2;color:#dc2626}
-.stat-value{font-size:24px;font-weight:700;line-height:1}
+.stat-value{font-size:22px;font-weight:800;line-height:1}
 .stat-label{font-size:12px;color:var(--muted);font-weight:500}
-.stat-change{font-size:12px;font-weight:500;display:flex;align-items:center;gap:3px}
+.stat-change{font-size:11px;font-weight:600;display:flex;align-items:center;gap:3px}
 .stat-change.up{color:#16a34a}.stat-change.down{color:#ef4444}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-.grid-65-35{display:grid;grid-template-columns:1.8fr 1fr;gap:16px}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid-65-35{display:grid;grid-template-columns:1.7fr 1fr;gap:14px}
+
+/* TABLES */
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:10px 12px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);background:#f8fafc}
-td{padding:11px 12px;border-bottom:1px solid #f1f5f9;color:var(--text)}
-tr:hover td{background:#f8fafc}
+th{text-align:left;padding:9px 12px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--border);background:#f8fafc}
+td{padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:hover td{background:#fafafa}
 tr:last-child td{border-bottom:none}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700}
 .badge-green{background:#dcfce7;color:#15803d}
 .badge-red{background:#fee2e2;color:#b91c1c}
 .badge-amber{background:#fef3c7;color:#b45309}
 .badge-blue{background:#dbeafe;color:#1d4ed8}
 .badge-purple{background:#ede9fe;color:#6d28d9}
 .badge-gray{background:#f1f5f9;color:#475569}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s}
+.badge-mpesa{background:#e6f9ee;color:#006b2e}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;text-align:center}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--green);color:#fff}.btn-primary:hover{background:var(--green-dark)}
 .btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:#f1f5f9}
 .btn-danger{background:#ef4444;color:#fff}.btn-danger:hover{background:#dc2626}
 .btn-blue{background:#3b82f6;color:#fff}.btn-blue:hover{background:#2563eb}
-.btn-amber{background:#f59e0b;color:#fff}
 .btn-sm{padding:5px 10px;font-size:12px}
-.btn-icon{padding:7px}
-.form-group{margin-bottom:14px}
-.form-label{font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
-.form-control{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text);background:var(--card);outline:none;transition:.15s}
+.btn-icon{padding:6px}
+.btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+
+/* FORMS */
+.form-group{margin-bottom:13px}
+.form-label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.form-control{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text);background:#fff;outline:none;transition:.15s}
 .form-control:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.1)}
+select.form-control{cursor:pointer}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
-.modal{background:var(--card);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
-.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)}
-.modal-title{font-size:16px;font-weight:700}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--card);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:1}
+.modal-title{font-size:15px;font-weight:700}
 .modal-body{padding:20px}
-.modal-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
-.modal-lg{max-width:760px}
-.pos-layout{display:grid;grid-template-columns:1fr 370px;height:calc(100vh - 56px);overflow:hidden}
-.pos-products{overflow-y:auto;padding:16px;background:var(--bg)}
-.pos-cart{background:var(--card);border-left:1px solid var(--border);display:flex;flex-direction:column}
-.cart-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:var(--card)}
+.modal-lg{max-width:700px}
+
+/* POS LAYOUT */
+.pos-layout{display:grid;grid-template-columns:1fr 360px;height:calc(100vh - 54px);overflow:hidden}
+.pos-products{overflow-y:auto;padding:14px;background:var(--bg)}
+.pos-cart{background:var(--card);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.cart-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .cart-items{flex:1;overflow-y:auto;padding:8px}
-.cart-item{display:flex;align-items:center;gap:8px;padding:10px;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:6px;background:var(--bg)}
-.qty-btn{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.cart-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:6px;background:#fafafa}
+.cart-item-name{font-size:12px;font-weight:700;flex:1;line-height:1.3}
+.cart-item-price{font-size:12px;color:var(--green);font-weight:700}
+.qty-ctrl{display:flex;align-items:center;gap:5px;margin-top:3px}
+.qty-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;line-height:1;transition:.1s}
 .qty-btn:hover{background:var(--green);color:#fff;border-color:var(--green)}
-.qty-val{font-size:13px;font-weight:700;min-width:20px;text-align:center}
-.cart-summary{padding:14px 16px;border-top:1px solid var(--border)}
-.summary-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:var(--muted)}
-.summary-total{display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding-top:8px;border-top:1px solid var(--border);margin-top:4px}
-.payment-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
-.pay-btn{padding:10px 4px;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--card);cursor:pointer;text-align:center;font-size:12px;font-weight:600;color:var(--muted);transition:.15s}
+.qty-val{font-size:13px;font-weight:800;min-width:22px;text-align:center}
+.cart-summary{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.summary-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:var(--muted)}
+.summary-total{display:flex;justify-content:space-between;font-size:17px;font-weight:800;padding-top:8px;border-top:2px solid var(--border);margin-top:4px}
+.pay-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0}
+.pay-btn{padding:8px 4px;border-radius:var(--radius);border:1.5px solid var(--border);background:#fff;cursor:pointer;text-align:center;font-size:11px;font-weight:700;color:var(--muted);transition:.15s;line-height:1.4}
 .pay-btn.active{border-color:var(--green);background:var(--green-light);color:var(--green-dark)}
-.pay-btn:hover:not(.active){background:#f1f5f9}
-.pay-btn .ti{display:block;font-size:20px;margin-bottom:4px}
-.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-.product-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;cursor:pointer;transition:.15s;text-align:center}
-.product-card:hover{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.1)}
-.product-card:active{transform:scale(.97)}
+.pay-btn:hover:not(.active){background:#f8fafc}
+.pay-btn .ti{display:block;font-size:19px;margin-bottom:3px}
+.pay-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;outline:none;transition:.15s;margin-top:6px}
+.pay-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.1)}
+
+/* PRODUCT GRID */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.product-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:12px;cursor:pointer;transition:.15s;text-align:center;user-select:none}
+.product-card:hover{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.08);transform:translateY(-1px)}
+.product-card:active{transform:scale(.96)}
 .product-emoji{font-size:28px;margin-bottom:6px}
-.product-name{font-size:11px;font-weight:600;margin-bottom:4px;line-height:1.3}
-.product-price{font-size:13px;font-weight:700;color:var(--green)}
+.product-name{font-size:11px;font-weight:700;line-height:1.3;margin-bottom:3px}
+.product-price{font-size:13px;font-weight:800;color:var(--green)}
 .product-stock{font-size:10px;color:var(--muted)}
+
+/* SEARCH */
 .search-bar{position:relative}
-.search-bar input{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;background:var(--card);outline:none}
+.search-bar input{width:100%;padding:9px 12px 9px 34px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;background:#fff;outline:none;transition:.15s}
 .search-bar input:focus{border-color:var(--green)}
-.search-bar .ti{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px}
-.alert{padding:12px 16px;border-radius:var(--radius);font-size:13px;display:flex;align-items:flex-start;gap:8px;margin-bottom:12px}
+.search-bar .ti{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none}
+
+/* ALERTS */
+.alert{padding:10px 14px;border-radius:var(--radius);font-size:13px;display:flex;align-items:flex-start;gap:8px;margin-bottom:12px}
 .alert-warning{background:#fef3c7;border:1px solid #fde68a;color:#92400e}
 .alert-danger{background:#fee2e2;border:1px solid #fecaca;color:#991b1b}
 .alert-success{background:#dcfce7;border:1px solid #bbf7d0;color:#166534}
 .alert-info{background:#dbeafe;border:1px solid #bfdbfe;color:#1e40af}
-.progress-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden}
-.progress-fill{height:100%;border-radius:3px;background:var(--green);transition:.3s}
-.tabs{display:flex;gap:4px;background:#f1f5f9;border-radius:var(--radius);padding:4px;margin-bottom:18px}
-.tab{padding:7px 14px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);transition:.15s}
-.tab.active{background:var(--card);color:var(--text)}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.section-title{font-size:16px;font-weight:700}
-.empty-state{text-align:center;padding:48px 24px;color:var(--muted)}
-.receipt{background:#fff;padding:20px;font-family:monospace;font-size:12px;border:2px dashed #ddd;border-radius:8px;white-space:pre;line-height:1.6}
-.notification{position:fixed;top:16px;right:16px;background:#1e293b;color:#fff;padding:12px 18px;border-radius:var(--radius-lg);font-size:13px;z-index:9999;display:flex;align-items:center;gap:8px;animation:slideIn .3s ease}
-@keyframes slideIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* PROGRESS */
+.progress-bar{height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:.4s}
+
+/* CHIPS */
 .chip-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;background:var(--card);color:var(--muted);transition:.15s}
+.chip{padding:5px 11px;border-radius:20px;border:1px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:var(--muted);transition:.15s;user-select:none}
 .chip.active{background:var(--green);color:#fff;border-color:var(--green)}
 .chip:hover:not(.active){background:#f1f5f9}
-.login-screen{position:fixed;inset:0;background:var(--sidebar-bg);display:flex;align-items:center;justify-content:center;z-index:9998}
-.login-box{background:var(--card);border-radius:var(--radius-lg);padding:36px;width:360px}
+
+/* TABS */
+.tabs{display:flex;gap:3px;background:#f1f5f9;border-radius:var(--radius);padding:3px;margin-bottom:16px}
+.tab{padding:7px 13px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:.15s;user-select:none}
+.tab.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* MISC */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-size:15px;font-weight:700}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-state .ti{font-size:40px;color:#e2e8f0;display:block;margin-bottom:10px}
+
+/* RECEIPT */
+.receipt-paper{background:linear-gradient(180deg,#fff 0%,#f9fafb 100%);border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;font-size:12px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.receipt-header{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;padding:16px;text-align:center}
+.receipt-header h2{font-size:18px;font-weight:900;letter-spacing:1px}
+.receipt-header p{font-size:11px;opacity:.85;margin-top:2px}
+.receipt-body{padding:14px;font-family:'Courier New',monospace}
+.receipt-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.receipt-divider{border:none;border-top:1px dashed #d1d5db;margin:8px 0}
+.receipt-total-row{display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:var(--green);padding:6px 0}
+.receipt-item{display:flex;justify-content:space-between;padding:3px 0;font-size:12px}
+.receipt-footer{background:linear-gradient(135deg,#f0fdf4,#dcfce7);padding:12px;text-align:center;border-top:1px solid #bbf7d0}
+.receipt-footer p{font-size:12px;color:var(--green-dark);font-weight:600}
+.receipt-badge{display:inline-block;background:var(--green);color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-top:4px}
+
+/* M-PESA */
+.mpesa-card{background:linear-gradient(135deg,#00a651 0%,#007a3d 100%);border-radius:var(--radius-lg);padding:14px;color:#fff;margin-top:8px}
+.mpesa-logo{font-size:20px;font-weight:900;letter-spacing:2px;font-style:italic}
+.mpesa-input{flex:1;padding:9px 12px;border-radius:var(--radius);border:none;font-size:13px;background:rgba(255,255,255,.2);color:#fff;outline:none;width:100%;margin-top:8px}
+.mpesa-input::placeholder{color:rgba(255,255,255,.65)}
+.mpesa-input:focus{background:rgba(255,255,255,.3)}
+.mpesa-btn{width:100%;margin-top:8px;padding:10px;background:#fff;color:#007a3d;border:none;border-radius:var(--radius);font-weight:800;cursor:pointer;font-size:13px;transition:.15s}
+.mpesa-btn:hover:not(:disabled){background:#f0fdf4}
+.mpesa-btn:disabled{opacity:.6;cursor:not-allowed}
+.mpesa-status{font-size:12px;padding:6px 10px;border-radius:var(--radius);background:rgba(255,255,255,.15);margin-top:8px;display:flex;align-items:center;gap:6px}
+
+/* CHANGE DISPLAY */
+.change-box{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #16a34a;border-radius:var(--radius);padding:10px;text-align:center;margin-top:8px}
+.change-box .change-label{font-size:11px;color:var(--green-dark);font-weight:700;text-transform:uppercase}
+.change-box .change-amount{font-size:22px;font-weight:900;color:var(--green)}
+
+/* SCANNER */
+.scanner-box{background:#000;border-radius:var(--radius-lg);padding:20px;text-align:center;color:#fff;position:relative;overflow:hidden;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.scanner-line{width:80%;height:2px;background:linear-gradient(90deg,transparent,#16a34a,transparent);position:absolute;top:50%;animation:scan 2s linear infinite}
+@keyframes scan{0%{top:30%}50%{top:70%}100%{top:30%}}
+.scanner-corners::before,.scanner-corners::after{content:'';position:absolute;width:30px;height:30px;border-color:#16a34a;border-style:solid}
+.scanner-corners::before{top:12px;left:12px;border-width:3px 0 0 3px}
+.scanner-corners::after{bottom:12px;right:12px;border-width:0 3px 3px 0}
+
+/* NOTIFICATION */
+.notif{position:fixed;top:16px;right:16px;background:#1e293b;color:#fff;padding:11px 16px;border-radius:var(--radius-lg);font-size:13px;z-index:9999;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:slideIn .3s ease;max-width:320px}
+@keyframes slideIn{from{transform:translateX(110px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1a2744 50%,#0f172a 100%);display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column}
+.login-box{background:#fff;border-radius:16px;padding:36px;width:380px;box-shadow:0 25px 60px rgba(0,0,0,.4)}
 .login-logo{text-align:center;margin-bottom:28px}
-.mpesa-spinner{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+.login-logo .icon{width:64px;height:64px;background:linear-gradient(135deg,#16a34a,#15803d);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px;box-shadow:0 8px 20px rgba(22,163,74,.4)}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin:16px 0}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:#e2e8f0;transition:.2s}
+.pin-dot.filled{background:var(--green)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.pin-key{padding:14px;background:#f8fafc;border:1.5px solid var(--border);border-radius:var(--radius);text-align:center;font-size:18px;font-weight:700;cursor:pointer;transition:.15s;user-select:none}
+.pin-key:hover{background:#f0fdf4;border-color:var(--green);color:var(--green)}
+.pin-key:active{transform:scale(.93);background:var(--green-light)}
+.pin-key.del{font-size:14px;color:var(--red)}
+.pin-key.login-key{background:var(--green);color:#fff;border-color:var(--green);font-size:14px}
+.pin-key.login-key:hover{background:var(--green-dark)}
+
+/* SPINNER */
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
-.mpesa-modal-icon{width:64px;height:64px;background:#1da462;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;color:#fff}
-@media print{.sidebar,.topbar,.pos-cart,.btn:not(.print-include){display:none!important}.content{padding:0}.receipt{border:none}}
+
+/* ROLE BADGE */
+.role-admin{background:#ede9fe;color:#5b21b6}
+.role-cashier{background:#dbeafe;color:#1e40af}
+.role-manager{background:#dcfce7;color:#14532d}
+
+@media print{
+  .sidebar,.topbar,.modal-footer .btn-secondary{display:none!important}
+  .receipt-paper{box-shadow:none;border:none}
+}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
-// ===================== CONFIG =====================
-const MPESA_CONFIG = {
-  consumerKey: 'OPbwkvVnDdqCwITksJBtfA1nSYwcDCG92feE8VdbVvegFs2G',
+// ════════════════════════════════════════════════════
+//  M-PESA CONFIG — SANDBOX
+//  ⚠️ Move to backend server before going live
+// ════════════════════════════════════════════════════
+const MPESA = {
+  consumerKey:    'OPbwkvVnDdqCwITksJBtfA1nSYwcDCG92feE8VdbVvegFs2G',
   consumerSecret: 'tAl8c4aiA6PQASGj8ihN5I1m6MuqeRmgjbG974juWPOvC8f6rXVHHucoZ76ctfng',
-  shortcode: '174379', // Sandbox shortcode — replace with your till/paybill
-  passkey: 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919', // Sandbox passkey
-  callbackURL: 'https://yourdomain.com/mpesa/callback', // Replace with your callback URL
-  environment: 'sandbox' // Change to 'production' for live
+  base:           'https://sandbox.safaricom.co.ke',
+  shortcode:      '174379',
+  passkey:        'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+  callbackURL:    'https://yourcallback.url/mpesa',
 };
 
-// ===================== DATABASE =====================
-const DB = {
-  currentUser: null,
-  users: [
+async function mpesaToken(){
+  const r=await fetch(`${MPESA.base}/oauth/v1/generate?grant_type=client_credentials`,{headers:{'Authorization':'Basic '+btoa(MPESA.consumerKey+':'+MPESA.consumerSecret)}});
+  return (await r.json()).access_token;
+}
+function mpesaTS(){const n=new Date();return n.getFullYear()+String(n.getMonth()+1).padStart(2,'0')+String(n.getDate()).padStart(2,'0')+String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0')+String(n.getSeconds()).padStart(2,'0');}
+async function mpesaSTK(phone,amount,ref){
+  let msisdn=phone.replace(/\D/g,'');
+  if(msisdn.startsWith('0'))msisdn='254'+msisdn.slice(1);
+  if(msisdn.startsWith('+'))msisdn=msisdn.slice(1);
+  const tok=await mpesaToken(),ts=mpesaTS();
+  const pwd=btoa(MPESA.shortcode+MPESA.passkey+ts);
+  const r=await fetch(`${MPESA.base}/mpesa/stkpush/v1/processrequest`,{method:'POST',headers:{'Authorization':'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({BusinessShortCode:MPESA.shortcode,Password:pwd,Timestamp:ts,TransactionType:'CustomerPayBillOnline',Amount:Math.ceil(amount),PartyA:msisdn,PartyB:MPESA.shortcode,PhoneNumber:msisdn,CallBackURL:MPESA.callbackURL,AccountReference:ref||'MiniMartPOS',TransactionDesc:'MiniMart Purchase'})});
+  return await r.json();
+}
+async function mpesaQuery(checkoutId){
+  const tok=await mpesaToken(),ts=mpesaTS();
+  const pwd=btoa(MPESA.shortcode+MPESA.passkey+ts);
+  const r=await fetch(`${MPESA.base}/mpesa/stkpushquery/v1/query`,{method:'POST',headers:{'Authorization':'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({BusinessShortCode:MPESA.shortcode,Password:pwd,Timestamp:ts,CheckoutRequestID:checkoutId})});
+  return await r.json();
+}
+
+// ════════════════════════════════════════════════════
+//  DATABASE
+// ════════════════════════════════════════════════════
+const DB={
+  currentUser:null,
+  sidebarCollapsed:false,
+  users:[
     {id:1,name:'Admin User',email:'admin@minimart.co.ke',role:'admin',pin:'1234',active:true,created:'2024-01-01'},
     {id:2,name:'Jane Cashier',email:'jane@minimart.co.ke',role:'cashier',pin:'5678',active:true,created:'2024-02-01'},
-    {id:3,name:'Bob Manager',email:'bob@minimart.co.ke',role:'manager',pin:'9012',active:true,created:'2024-03-01'},
   ],
-  categories: [
+  categories:[
     {id:1,name:'Beverages',icon:'🥤'},{id:2,name:'Food & Snacks',icon:'🍫'},
     {id:3,name:'Dairy',icon:'🥛'},{id:4,name:'Household',icon:'🧴'},
     {id:5,name:'Fresh Produce',icon:'🥦'},{id:6,name:'Personal Care',icon:'🧼'},
   ],
-  products: [
+  products:[
     {id:1,name:'Coca-Cola 500ml',sku:'BEV001',category:1,emoji:'🥤',buyPrice:40,sellPrice:65,stock:120,minStock:20,barcode:'5901234123457',active:true},
     {id:2,name:'Pepsi 500ml',sku:'BEV002',category:1,emoji:'🧃',buyPrice:38,sellPrice:60,stock:80,minStock:20,barcode:'5901234123458',active:true},
     {id:3,name:'Minute Maid 1L',sku:'BEV003',category:1,emoji:'🍊',buyPrice:90,sellPrice:130,stock:45,minStock:15,barcode:'5901234123459',active:true},
@@ -189,988 +335,1182 @@ const DB = {
     {id:15,name:'Royco Mchuzi Mix',sku:'FD003',category:2,emoji:'🫙',buyPrice:25,sellPrice:40,stock:100,minStock:30,barcode:'5901234123471',active:true},
     {id:16,name:'Colgate Toothpaste',sku:'PC001',category:6,emoji:'🦷',buyPrice:90,sellPrice:135,stock:40,minStock:15,barcode:'5901234123472',active:true},
   ],
-  sales: [],
-  customers: [
-    {id:1,name:'Mary Wanjiku',phone:'254712345678',email:'mary@email.com',points:450,balance:0,totalSpent:12500,transactions:18,joined:'2024-01-15'},
-    {id:2,name:'John Kamau',phone:'254723456789',email:'john@email.com',points:230,balance:500,totalSpent:7800,transactions:11,joined:'2024-02-10'},
-    {id:3,name:'Fatuma Ali',phone:'254734567890',email:'fatuma@email.com',points:680,balance:0,totalSpent:19200,transactions:25,joined:'2023-12-01'},
-    {id:4,name:'Peter Odhiambo',phone:'254745678901',email:'peter@email.com',points:120,balance:200,totalSpent:4500,transactions:7,joined:'2024-03-20'},
+  sales:[],
+  customers:[
+    {id:1,name:'Mary Wanjiku',phone:'0712345678',email:'mary@email.com',points:450,balance:0,totalSpent:12500,transactions:18,joined:'2024-01-15'},
+    {id:2,name:'John Kamau',phone:'0723456789',email:'john@email.com',points:230,balance:500,totalSpent:7800,transactions:11,joined:'2024-02-10'},
+    {id:3,name:'Fatuma Ali',phone:'0734567890',email:'fatuma@email.com',points:680,balance:0,totalSpent:19200,transactions:25,joined:'2023-12-01'},
+    {id:4,name:'Peter Odhiambo',phone:'0745678901',email:'peter@email.com',points:120,balance:200,totalSpent:4500,transactions:7,joined:'2024-03-20'},
   ],
-  suppliers: [
+  suppliers:[
     {id:1,name:'Coca-Cola Beverages',contact:'James Mwangi',phone:'0712000001',email:'orders@cokeke.com',category:'Beverages',active:true},
     {id:2,name:'Bidco Africa',contact:'Sarah Njeri',phone:'0723000002',email:'supply@bidco.co.ke',category:'Food & Household',active:true},
     {id:3,name:'KCC Kenya',contact:'David Otieno',phone:'0734000003',email:'orders@kcc.co.ke',category:'Dairy',active:true},
     {id:4,name:'Fresh Farm Kenya',contact:'Grace Wambua',phone:'0745000004',email:'fresh@farmke.co.ke',category:'Produce',active:true},
   ],
-  inventory_log: [],
-  activityLog: [],
-  settings: {
-    storeName:'MiniMart Kenya',storeAddress:'Nairobi, Kenya',phone:'0700 000 000',
-    currency:'KSh',taxRate:16,loyaltyRate:2,branch:'Main Branch - Westlands'
-  }
+  invLog:[],
+  actLog:[],
+  settings:{storeName:'MiniMart Kenya',storeAddress:'Westlands, Nairobi',phone:'0700 000 000',currency:'KSh',taxRate:16,loyaltyRate:2,branch:'Main Branch — Westlands'},
 };
 
-// Generate sample sales history
+// Seed 30-day sample sales
 (function(){
-  const now = new Date(); let id = 1;
+  const p=DB.products,now=new Date();let sid=1;
   for(let d=30;d>=0;d--){
-    const n = Math.floor(Math.random()*8)+3;
-    for(let s=0;s<n;s++){
-      const ni = Math.floor(Math.random()*4)+1, items=[];
-      let sub=0;
-      for(let i=0;i<ni;i++){
-        const p=DB.products[Math.floor(Math.random()*DB.products.length)],q=Math.floor(Math.random()*3)+1;
-        items.push({productId:p.id,name:p.name,qty:q,price:p.sellPrice,cost:p.buyPrice});
-        sub+=p.sellPrice*q;
+    for(let s=0;s<Math.floor(Math.random()*8)+3;s++){
+      const items=[];let sub=0;
+      for(let i=0;i<Math.floor(Math.random()*4)+1;i++){
+        const pr=p[Math.floor(Math.random()*p.length)],qty=Math.floor(Math.random()*3)+1;
+        items.push({productId:pr.id,name:pr.name,qty,price:pr.sellPrice,cost:pr.buyPrice});sub+=pr.sellPrice*qty;
       }
-      const disc=Math.random()>.8?Math.floor(sub*.05):0, tax=Math.round((sub-disc)*.16/1.16);
-      const date=new Date(now); date.setDate(date.getDate()-d); date.setHours(Math.floor(Math.random()*12)+8,Math.floor(Math.random()*60));
-      const methods=['cash','mpesa','card'];
-      DB.sales.push({id:id++,items,subtotal:sub,discount:disc,tax,total:sub-disc,
-        paymentMethod:methods[Math.floor(Math.random()*3)],
-        cashier:d%3===0?'Jane Cashier':'Bob Manager',
-        customerId:Math.random()>.6?Math.floor(Math.random()*4)+1:null,
-        date:date.toISOString(),receiptNo:`RCP${String(id-1).padStart(5,'0')}`});
+      const disc=Math.random()>.8?Math.floor(sub*.05):0,total=sub-disc,tax=Math.round(total*.16/1.16);
+      const dt=new Date(now);dt.setDate(dt.getDate()-d);dt.setHours(Math.floor(Math.random()*12)+8,Math.floor(Math.random()*60));
+      DB.sales.push({id:sid++,items,subtotal:sub,discount:disc,tax,total,paymentMethod:['cash','mpesa','card'][Math.floor(Math.random()*3)],cashier:d%2===0?'Jane Cashier':'Admin User',customerId:Math.random()>.6?Math.floor(Math.random()*4)+1:null,date:dt.toISOString(),receiptNo:'RCP'+String(sid-1).padStart(5,'0')});
     }
   }
 })();
 
-// ===================== UTILITIES =====================
-const fmt = n => `KSh ${Number(n).toLocaleString()}`;
-const fmtDate = d => new Date(d).toLocaleDateString('en-KE',{day:'2-digit',month:'short',year:'numeric'});
-const fmtTime = d => new Date(d).toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
-const fmtDT = d => `${fmtDate(d)} ${fmtTime(d)}`;
-let notifTimer;
-function notify(msg,type='success'){
-  document.querySelector('.notification')?.remove();
-  const cols={success:'#16a34a',danger:'#ef4444',info:'#3b82f6',warning:'#d97706'};
-  const icns={success:'ti-check',danger:'ti-alert-circle',info:'ti-info-circle',warning:'ti-alert-triangle'};
-  const n=document.createElement('div'); n.className='notification';
-  n.innerHTML=`<i class="ti ${icns[type]}" style="color:${cols[type]}"></i><span>${msg}</span>`;
-  document.body.appendChild(n);
-  clearTimeout(notifTimer); notifTimer=setTimeout(()=>n.remove(),3500);
+// ════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════
+const fmt=n=>'KSh '+Number(n).toLocaleString();
+const fmtDate=d=>new Date(d).toLocaleDateString('en-KE',{day:'2-digit',month:'short',year:'numeric'});
+const fmtTime=d=>new Date(d).toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
+const fmtDT=d=>fmtDate(d)+' '+fmtTime(d);
+let _nt;
+function notif(msg,type='success'){
+  document.querySelector('.notif')?.remove();
+  const ic={success:'ti-check',danger:'ti-alert-circle',info:'ti-info-circle',warning:'ti-alert-triangle'};
+  const cl={success:'#16a34a',danger:'#ef4444',info:'#3b82f6',warning:'#f59e0b'};
+  const n=document.createElement('div');n.className='notif';
+  n.innerHTML=`<i class="ti ${ic[type]}" style="color:${cl[type]};font-size:16px"></i><span>${msg}</span>`;
+  document.body.appendChild(n);clearTimeout(_nt);_nt=setTimeout(()=>n.remove(),3500);
 }
 
-// ===================== M-PESA STK PUSH =====================
-const MPesa = {
-  token: null, tokenExpiry: 0,
+// ════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════
+let S={
+  page:'dashboard',modal:null,
+  cart:[],payMethod:'cash',discount:0,
+  searchTerm:'',posCategory:0,
+  prodCatFilter:0,custSearch:'',
+  selectedCust:null,cashReceived:'',
+  mpesaPhone:'',mpesaStatus:null,mpesaCheckId:null,mpesaPending:false,
+  mpesaPolling:false,
+  loginPin:'',loginUser:1,
+  reportTab:'overview',
+  barcodeBuffer:'',barcodeTimer:null,
+};
+function ss(o){Object.assign(S,o);render();}
+function nav(p){ss({page:p,searchTerm:'',modal:null});}
 
-  async getToken() {
-    if(this.token && Date.now() < this.tokenExpiry) return this.token;
-    const base = MPESA_CONFIG.environment === 'production'
-      ? 'https://api.safaricom.co.ke'
-      : 'https://sandbox.safaricom.co.ke';
-    const creds = btoa(`${MPESA_CONFIG.consumerKey}:${MPESA_CONFIG.consumerSecret}`);
-    try {
-      const res = await fetch(`${base}/oauth/v1/generate?grant_type=client_credentials`, {
-        headers: { 'Authorization': `Basic ${creds}` }
-      });
-      const data = await res.json();
-      this.token = data.access_token;
-      this.tokenExpiry = Date.now() + (parseInt(data.expires_in)-60)*1000;
-      return this.token;
-    } catch(e) {
-      console.error('M-Pesa token error:', e);
-      return null;
-    }
-  },
-
-  getPassword() {
-    const ts = this.getTimestamp();
-    return btoa(`${MPESA_CONFIG.shortcode}${MPESA_CONFIG.passkey}${ts}`);
-  },
-
-  getTimestamp() {
-    return new Date().toISOString().replace(/[-T:.Z]/g,'').slice(0,14);
-  },
-
-  async stkPush(phone, amount, accountRef, description) {
-    const base = MPESA_CONFIG.environment === 'production'
-      ? 'https://api.safaricom.co.ke'
-      : 'https://sandbox.safaricom.co.ke';
-    const token = await this.getToken();
-    if(!token) throw new Error('Could not get M-Pesa token');
-    const sanitized = phone.replace(/^0/,'254').replace(/\D/g,'');
-    const payload = {
-      BusinessShortCode: MPESA_CONFIG.shortcode,
-      Password: this.getPassword(),
-      Timestamp: this.getTimestamp(),
-      TransactionType: 'CustomerPayBillOnline',
-      Amount: Math.ceil(amount),
-      PartyA: sanitized,
-      PartyB: MPESA_CONFIG.shortcode,
-      PhoneNumber: sanitized,
-      CallBackURL: MPESA_CONFIG.callbackURL,
-      AccountReference: accountRef,
-      TransactionDesc: description
-    };
-    const res = await fetch(`${base}/mpesa/stkpush/v1/processrequest`, {
-      method:'POST',
-      headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    return await res.json();
+// ════════════════════════════════════════════════════
+//  BARCODE SCANNER (global keyboard hook)
+// ════════════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  // If focused on input, skip barcode handling
+  if(document.activeElement&&['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;
+  if(e.key==='Enter'){
+    if(S.barcodeBuffer.length>4){handleBarcode(S.barcodeBuffer);}
+    S.barcodeBuffer='';
+  } else if(e.key.length===1){
+    S.barcodeBuffer+=e.key;
+    clearTimeout(S.barcodeTimer);
+    S.barcodeTimer=setTimeout(()=>{S.barcodeBuffer='';},200);
   }
-};
+});
+function handleBarcode(code){
+  const prod=DB.products.find(p=>p.barcode===code||p.sku===code);
+  if(!prod){notif('Product not found: '+code,'warning');return;}
+  if(prod.stock<=0){notif(prod.name+' is out of stock','danger');return;}
+  addToCart(prod.id);
+  notif('Added: '+prod.name,'success');
+}
 
-// ===================== STATE =====================
-let S = {
-  page:'dashboard', modal:null, cart:[], paymentMethod:'cash',
-  discount:0, searchTerm:'', posCategory:0, editItem:null,
-  reportTab:'daily', prodCatFilter:0, customerSearch:'',
-  selectedCustomer:null, cashReceived:'', mpesaPhone:'',
-  mpesaStatus:null // null | 'pending' | 'success' | 'failed'
-};
-function set(s){Object.assign(S,s);render();}
-function nav(page){set({page,searchTerm:'',modal:null});}
-
-// ===================== RENDER =====================
+// ════════════════════════════════════════════════════
+//  RENDER ENGINE
+// ════════════════════════════════════════════════════
 function render(){
   const app=document.getElementById('app');
-  if(!DB.currentUser){app.innerHTML=loginHTML();bindLogin();return;}
-  app.innerHTML=`${sidebarHTML()}
-    <div class="main">${topbarHTML()}
-      ${S.page==='pos'?posHTML():`<div class="content">${pages[S.page]?.()??''}</div>`}
-    </div>${S.modal?modalHTML():''}`;
-  bindAll();
+  if(!DB.currentUser){app.innerHTML=renderLogin();bindLogin();return;}
+  const collapsed=DB.sidebarCollapsed?' collapsed':'';
+  app.innerHTML=`${renderSidebar(collapsed)}<div class="main">${renderTopbar()}${renderPage()}</div>${S.modal?renderModal():''}`;
+  bind();
 }
 
-// ===================== LOGIN =====================
-function loginHTML(){return `<div class="login-screen">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="logo-icon" style="width:56px;height:56px;font-size:26px;margin:0 auto 12px">🛒</div>
-      <h2 style="font-size:22px;font-weight:700">MiniMart POS</h2>
-      <p style="font-size:13px;color:var(--muted);margin-top:4px">Point of Sale System — Kenya</p>
+// ─── LOGIN (PIN pad, no visible passwords) ────────────────────
+function renderLogin(){
+  const user=DB.users.find(u=>u.id===S.loginUser);
+  const filled=S.loginPin.length;
+  return `<div class="login-screen">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="icon">🛒</div>
+        <h2 style="font-size:22px;font-weight:800">MiniMart POS</h2>
+        <p style="color:var(--muted);font-size:13px;margin-top:3px">Enter your PIN to continue</p>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        ${DB.users.map(u=>`<div style="flex:1;padding:10px;border-radius:var(--radius);border:2px solid ${S.loginUser===u.id?'var(--green)':'var(--border)'};background:${S.loginUser===u.id?'var(--green-light)':'#f8fafc'};cursor:pointer;text-align:center" data-seluser="${u.id}">
+          <div style="width:36px;height:36px;border-radius:50%;background:${S.loginUser===u.id?'var(--green)':'#e2e8f0'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:${S.loginUser===u.id?'#fff':'var(--muted)'};margin:0 auto 6px">${u.name.split(' ').map(n=>n[0]).join('')}</div>
+          <div style="font-size:12px;font-weight:700;color:${S.loginUser===u.id?'var(--green-dark)':'var(--text)'}">${u.name.split(' ')[0]}</div>
+          <div style="font-size:10px;color:var(--muted)">${u.role}</div>
+        </div>`).join('')}
+      </div>
+      <div class="pin-dots">
+        ${[1,2,3,4,5,6].map(i=>`<div class="pin-dot${i<=filled?' filled':''}"></div>`).join('')}
+      </div>
+      <div class="pin-pad">
+        ${[1,2,3,4,5,6,7,8,9].map(n=>`<div class="pin-key" data-pinkey="${n}">${n}</div>`).join('')}
+        <div class="pin-key del" data-pinkey="del"><i class="ti ti-backspace"></i></div>
+        <div class="pin-key" data-pinkey="0">0</div>
+        <div class="pin-key login-key" data-pinkey="enter"><i class="ti ti-login"></i></div>
+      </div>
+      <p style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted)">MiniMart POS v2.0 © 2025</p>
     </div>
-    <div class="alert alert-info" style="margin-bottom:16px"><i class="ti ti-info-circle"></i>Demo — Admin PIN: <strong>1234</strong> &nbsp;|&nbsp; Cashier PIN: <strong>5678</strong></div>
-    <div class="form-group"><label class="form-label">Select Account</label>
-      <select class="form-control" id="lUser">${DB.users.map(u=>`<option value="${u.id}">${u.name} (${u.role})</option>`).join('')}</select>
-    </div>
-    <div class="form-group"><label class="form-label">PIN</label>
-      <input type="password" class="form-control" id="lPin" placeholder="Enter PIN" maxlength="6" style="font-size:20px;letter-spacing:8px"/>
-    </div>
-    <button class="btn btn-primary" id="lBtn" style="width:100%;justify-content:center;padding:12px;font-size:15px"><i class="ti ti-login"></i> Sign In</button>
-    <p style="text-align:center;margin-top:14px;font-size:11px;color:var(--muted)">MiniMart POS v2.1 • M-Pesa Integrated • Nairobi, Kenya</p>
-  </div>
-</div>`;}
+  </div>`;
+}
 function bindLogin(){
-  const go=()=>{
-    const u=DB.users.find(x=>x.id===parseInt(document.getElementById('lUser').value));
-    if(u&&u.pin===document.getElementById('lPin').value){
-      DB.currentUser=u; DB.activityLog.unshift({user:u.name,action:'Login',time:new Date().toISOString()}); render();
-    } else notify('Invalid PIN','danger');
-  };
-  document.getElementById('lBtn').onclick=go;
-  document.getElementById('lPin').onkeydown=e=>{if(e.key==='Enter')go();};
+  document.querySelectorAll('[data-seluser]').forEach(el=>el.onclick=()=>{ss({loginUser:parseInt(el.dataset.seluser),loginPin:'',});});
+  document.querySelectorAll('[data-pinkey]').forEach(el=>el.onclick=()=>{
+    const k=el.dataset.pinkey;
+    if(k==='del'){ss({loginPin:S.loginPin.slice(0,-1)});return;}
+    if(k==='enter'){doLogin();return;}
+    if(S.loginPin.length>=6)return;
+    const np=S.loginPin+k;
+    const user=DB.users.find(u=>u.id===S.loginUser);
+    if(user&&user.pin===np){
+      DB.currentUser=user;DB.actLog.unshift({user:user.name,action:'Logged in',time:new Date().toISOString()});
+      ss({loginPin:''});
+    } else {
+      ss({loginPin:np});
+      if(np.length>=6){setTimeout(()=>ss({loginPin:''}),500);}
+    }
+  });
+}
+function doLogin(){
+  const user=DB.users.find(u=>u.id===S.loginUser);
+  if(user&&user.pin===S.loginPin){DB.currentUser=user;DB.actLog.unshift({user:user.name,action:'Logged in',time:new Date().toISOString()});ss({loginPin:''});}
+  else{ss({loginPin:''});notif('Wrong PIN','danger');}
 }
 
-// ===================== SIDEBAR =====================
-function sidebarHTML(){
-  const low=DB.products.filter(p=>p.stock<=p.minStock).length;
-  const items=[
-    {id:'dashboard',icon:'ti-dashboard',label:'Dashboard'},
-    {sep:'Sales'},
-    {id:'pos',icon:'ti-shopping-cart',label:'Point of Sale'},
-    {id:'transactions',icon:'ti-receipt',label:'Transactions'},
-    {sep:'Inventory'},
-    {id:'products',icon:'ti-package',label:'Products'},
-    {id:'inventory',icon:'ti-boxes',label:'Inventory',badge:low},
-    {id:'suppliers',icon:'ti-truck',label:'Suppliers'},
-    {sep:'People'},
-    {id:'customers',icon:'ti-users',label:'Customers'},
-    {id:'employees',icon:'ti-id-badge',label:'Employees'},
-    {sep:'Reports'},
-    {id:'reports',icon:'ti-chart-bar',label:'Reports & Analytics'},
-    {sep:'System'},
-    {id:'settings',icon:'ti-settings',label:'Settings'},
+// ─── SIDEBAR ─────────────────────────────────────────
+function renderSidebar(collapsed){
+  const isAdmin=DB.currentUser?.role==='admin';
+  const lowN=DB.products.filter(p=>p.stock<=p.minStock).length;
+  const allPages=[
+    {id:'dashboard',icon:'ti-dashboard',label:'Dashboard',all:true},
+    {sep:'Sales',all:true},
+    {id:'pos',icon:'ti-shopping-cart',label:'Point of Sale',all:true},
+    {id:'transactions',icon:'ti-receipt',label:'Transactions',all:true},
+    {sep:'Inventory',all:true},
+    {id:'products',icon:'ti-package',label:'Products',all:true},
+    {id:'inventory',icon:'ti-boxes',label:'Inventory',all:true},
+    {id:'suppliers',icon:'ti-truck',label:'Suppliers',admin:true},
+    {sep:'People',all:true},
+    {id:'customers',icon:'ti-users',label:'Customers',all:true},
+    {id:'employees',icon:'ti-id-badge',label:'Employees',admin:true},
+    {sep:'Reports',admin:true},
+    {id:'reports',icon:'ti-chart-bar',label:'Reports',admin:true},
+    {sep:'System',all:true},
+    {id:'settings',icon:'ti-settings',label:'Settings',all:true},
   ];
-  return `<div class="sidebar">
-    <div class="sidebar-logo"><div class="logo-icon">🛒</div>
+  const pages=allPages.filter(p=>p.all||(p.admin&&isAdmin));
+  return `<div class="sidebar${collapsed}" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🛒</div>
       <div><div class="logo-text">MiniMart POS</div><div class="logo-sub">${DB.settings.branch}</div></div>
     </div>
-    <nav class="sidebar-nav">${items.map(i=>i.sep?`<div class="nav-label">${i.sep}</div>`:
-      `<div class="nav-item${S.page===i.id?' active':''}" data-nav="${i.id}"><i class="ti ${i.icon}"></i>${i.label}${i.badge?`<span class="nav-badge">${i.badge}</span>`:''}</div>`
-    ).join('')}</nav>
+    <div class="collapse-btn" id="collapseBtn" title="Toggle sidebar"><i class="ti ti-chevron-left"></i></div>
+    <nav class="sidebar-nav">
+      ${pages.map(p=>p.sep?`<div class="nav-label">${p.sep}</div>`:
+        `<div class="nav-item${S.page===p.id?' active':''}" data-nav="${p.id}" title="${p.label}">
+          <i class="ti ${p.icon}"></i><span class="nav-text">${p.label}</span>
+          ${p.id==='inventory'&&lowN?`<span class="nav-badge">${lowN}</span>`:''}
+        </div>`).join('')}
+    </nav>
     <div class="sidebar-footer"><div class="user-card">
       <div class="user-avatar">${DB.currentUser.name.split(' ').map(n=>n[0]).join('')}</div>
-      <div style="flex:1"><p style="color:#e5e7eb;font-size:13px;font-weight:500">${DB.currentUser.name}</p><span style="color:#6b7280;font-size:11px">${DB.currentUser.role}</span></div>
-      <button class="btn btn-icon btn-secondary" id="logoutBtn" style="border:1px solid #374151;background:transparent;color:#9ca3af" title="Logout"><i class="ti ti-logout"></i></button>
+      <div class="user-info"><p>${DB.currentUser.name}</p><span>${DB.currentUser.role}</span></div>
+      <button class="btn btn-icon btn-secondary" id="logoutBtn" title="Logout" style="margin-left:auto;padding:5px"><i class="ti ti-logout" style="font-size:15px"></i></button>
     </div></div>
   </div>`;
 }
 
-// ===================== TOPBAR =====================
-function topbarHTML(){
-  const t={dashboard:'Dashboard',pos:'Point of Sale',transactions:'Transactions',products:'Products',inventory:'Inventory',suppliers:'Suppliers',customers:'Customers',employees:'Employees',reports:'Reports & Analytics',settings:'Settings'};
+// ─── TOPBAR ──────────────────────────────────────────
+function renderTopbar(){
+  const titles={dashboard:'Dashboard',pos:'Point of Sale',transactions:'Transactions',products:'Products',inventory:'Inventory',suppliers:'Suppliers',customers:'Customers',employees:'Employees',reports:'Reports & Analytics',settings:'Settings'};
   return `<div class="topbar">
-    <h1>${t[S.page]||'MiniMart POS'}</h1>
+    <h1>${titles[S.page]||'MiniMart POS'}</h1>
     <div style="display:flex;align-items:center;gap:12px">
       <span style="font-size:12px;color:var(--muted)">${new Date().toLocaleDateString('en-KE',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})}</span>
-      ${S.page!=='pos'?`<button class="btn btn-primary btn-sm" id="qPosBtn"><i class="ti ti-shopping-cart"></i> New Sale</button>`:''}
+      ${S.page!=='pos'?`<button class="btn btn-primary btn-sm" id="quickPos"><i class="ti ti-shopping-cart"></i> New Sale</button>`:''}
     </div>
   </div>`;
 }
 
-// ===================== PAGES =====================
-const pages = {
-  dashboard(){
-    const today=new Date().toDateString();
-    const ts=DB.sales.filter(s=>new Date(s.date).toDateString()===today);
-    const tr=ts.reduce((a,s)=>a+s.total,0), tn=ts.length;
-    const y=new Date(); y.setDate(y.getDate()-1);
-    const yr=DB.sales.filter(s=>new Date(s.date).toDateString()===y.toDateString()).reduce((a,s)=>a+s.total,0);
-    const ma=new Date(); ma.setDate(ma.getDate()-30);
-    const ms=DB.sales.filter(s=>new Date(s.date)>=ma), mr=ms.reduce((a,s)=>a+s.total,0);
-    const chg=yr>0?Math.round(((tr-yr)/yr)*100):0;
-    const avg=tn>0?Math.round(tr/tn):0;
-    const low=DB.products.filter(p=>p.stock<=p.minStock);
-    const rec=[...DB.sales].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
-    const pm={};DB.products.forEach(p=>{pm[p.id]=p;});
-    const prodMap={};
-    DB.sales.forEach(s=>s.items.forEach(it=>{
-      if(!prodMap[it.productId])prodMap[it.productId]={name:it.name,qty:0,rev:0};
-      prodMap[it.productId].qty+=it.qty; prodMap[it.productId].rev+=it.qty*it.price;
-    }));
-    const top=Object.values(prodMap).sort((a,b)=>b.rev-a.rev).slice(0,5);
-    const last7=[]; for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toDateString();const rv=DB.sales.filter(s=>new Date(s.date).toDateString()===ds).reduce((a,s)=>a+s.total,0);last7.push({l:d.toLocaleDateString('en-KE',{weekday:'short'}),rv});}
-    const mx=Math.max(...last7.map(d=>d.rv))||1;
-    return `
-    <div class="stats-grid">
-      <div class="stat-card"><div style="display:flex;justify-content:space-between"><div class="stat-icon green"><i class="ti ti-currency-dollar"></i></div><span class="stat-change ${chg>=0?'up':'down'}"><i class="ti ti-trending-${chg>=0?'up':'down'}"></i>${Math.abs(chg)}%</span></div><div class="stat-value">${fmt(tr)}</div><div class="stat-label">Today's Revenue</div></div>
-      <div class="stat-card"><div style="display:flex;justify-content:space-between"><div class="stat-icon blue"><i class="ti ti-receipt"></i></div><span class="stat-change up"><i class="ti ti-trending-up"></i>12%</span></div><div class="stat-value">${tn}</div><div class="stat-label">Today's Transactions</div></div>
-      <div class="stat-card"><div style="display:flex;justify-content:space-between"><div class="stat-icon amber"><i class="ti ti-shopping-bag"></i></div><span class="stat-change up">avg</span></div><div class="stat-value">${fmt(avg)}</div><div class="stat-label">Avg. Order Value</div></div>
-      <div class="stat-card"><div style="display:flex;justify-content:space-between"><div class="stat-icon purple"><i class="ti ti-calendar-month"></i></div><span style="font-size:11px;color:var(--muted)">30 days</span></div><div class="stat-value">${fmt(mr)}</div><div class="stat-label">Monthly Revenue</div></div>
-    </div>
-    <div class="grid-65-35" style="margin-bottom:16px">
-      <div class="card"><div class="card-header"><div><div class="card-title">Revenue — Last 7 Days</div></div></div>
-        <div style="display:flex;align-items:flex-end;gap:8px;height:140px;padding:0 4px">
-          ${last7.map(d=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-            <div style="font-size:10px;color:var(--muted)">${d.rv>0?Math.round(d.rv/1000)+'k':''}</div>
-            <div style="width:100%;background:${d.l===new Date().toLocaleDateString('en-KE',{weekday:'short'})?'var(--green)':'var(--green-muted)'};border-radius:4px 4px 0 0;height:${Math.max(4,Math.round(d.rv/mx*100))}%;min-height:4px"></div>
-            <div style="font-size:11px;color:var(--muted)">${d.l}</div>
-          </div>`).join('')}
-        </div>
-      </div>
-      <div class="card"><div class="card-header"><div class="card-title">Quick Stats</div></div>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          ${[['Total Products',DB.products.length],['Total Customers',DB.customers.length],['Low Stock',`<span class="badge badge-${low.length?'red':'green'}">${low.length}</span>`],['Monthly Revenue',`<span style="color:var(--green);font-weight:700">${fmt(mr)}</span>`]].map(([l,v])=>`<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">${l}</span><strong>${v}</strong></div>`).join('')}
-        </div>
-      </div>
-    </div>
-    <div class="grid-65-35" style="margin-bottom:16px">
-      <div class="card"><div class="card-header"><div class="card-title">Recent Transactions</div><button class="btn btn-secondary btn-sm" onclick="nav('transactions')">View All</button></div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>Receipt</th><th>Payment</th><th>Amount</th><th>Time</th></tr></thead>
-          <tbody>${rec.map(s=>`<tr>
-            <td><span style="font-family:monospace;font-size:12px;font-weight:600">${s.receiptNo}</span></td>
-            <td><span class="badge badge-${s.paymentMethod==='mpesa'?'green':s.paymentMethod==='card'?'blue':'gray'}">${s.paymentMethod==='mpesa'?'M-Pesa':s.paymentMethod}</span></td>
-            <td style="font-weight:700;color:var(--green)">${fmt(s.total)}</td>
-            <td style="color:var(--muted)">${fmtTime(s.date)}</td>
-          </tr>`).join('')}</tbody>
-        </table></div>
-      </div>
-      <div class="card"><div class="card-header"><div class="card-title">Low Stock Alerts</div><span class="badge badge-red">${low.length}</span></div>
-        ${low.length===0?`<div style="text-align:center;padding:24px;color:var(--muted)"><i class="ti ti-check" style="font-size:24px;color:var(--green);display:block;margin-bottom:8px"></i>All stock levels OK</div>`
-        :low.slice(0,6).map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9">
-          <span style="font-size:20px">${p.emoji}</span>
-          <div style="flex:1"><div style="font-size:13px;font-weight:600">${p.name}</div>
-            <div class="progress-bar" style="margin-top:4px"><div class="progress-fill" style="width:${Math.min(100,Math.round(p.stock/p.minStock*100))}%;background:${p.stock===0?'#ef4444':p.stock<p.minStock/2?'#f59e0b':'#16a34a'}"></div></div>
-          </div><span class="badge badge-${p.stock===0?'red':'amber'}">${p.stock}</span>
+// ─── PAGE ROUTER ─────────────────────────────────────
+function renderPage(){
+  if(S.page==='pos')return renderPOS();
+  const map={dashboard:renderDashboard,transactions:renderTransactions,products:renderProducts,inventory:renderInventory,suppliers:renderSuppliers,customers:renderCustomers,employees:renderEmployees,reports:renderReports,settings:renderSettings};
+  return `<div class="content">${(map[S.page]||(()=>'<div class="empty-state"><i class="ti ti-lock" style="font-size:48px;display:block;margin-bottom:12px"></i><p>Access restricted</p></div>'))()}</div>`;
+}
+
+// ════════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════════
+function renderDashboard(){
+  const today=new Date().toDateString();
+  const tS=DB.sales.filter(s=>new Date(s.date).toDateString()===today);
+  const tR=tS.reduce((a,s)=>a+s.total,0);
+  const yest=new Date();yest.setDate(yest.getDate()-1);
+  const yR=DB.sales.filter(s=>new Date(s.date).toDateString()===yest.toDateString()).reduce((a,s)=>a+s.total,0);
+  const mo30=new Date();mo30.setDate(mo30.getDate()-30);
+  const mS=DB.sales.filter(s=>new Date(s.date)>=mo30);
+  const mR=mS.reduce((a,s)=>a+s.total,0);
+  const rc=yR>0?Math.round(((tR-yR)/yR)*100):0;
+  const avg=tS.length>0?Math.round(tR/tS.length):0;
+  const lowS=DB.products.filter(p=>p.stock<=p.minStock);
+  const recent=[...DB.sales].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+  const last7=[];
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toDateString();last7.push({l:d.toLocaleDateString('en-KE',{weekday:'short'}),v:DB.sales.filter(s=>new Date(s.date).toDateString()===ds).reduce((a,s)=>a+s.total,0)});}
+  const maxV=Math.max(...last7.map(d=>d.v))||1;
+  const pm={cash:0,mpesa:0,card:0};DB.sales.forEach(s=>{pm[s.paymentMethod]=(pm[s.paymentMethod]||0)+1;});
+  const tot=DB.sales.length||1;
+  const prodMap={};DB.sales.forEach(s=>s.items.forEach(it=>{if(!prodMap[it.productId]){prodMap[it.productId]={name:it.name,qty:0,rev:0};}prodMap[it.productId].qty+=it.qty;prodMap[it.productId].rev+=it.qty*it.price;}));
+  const top=Object.values(prodMap).sort((a,b)=>b.rev-a.rev).slice(0,5);
+  return `
+  <div class="stats-grid">
+    <div class="stat-card"><div style="display:flex;align-items:center;justify-content:space-between"><div class="stat-icon green"><i class="ti ti-currency-dollar"></i></div><span class="stat-change ${rc>=0?'up':'down'}"><i class="ti ti-trending-${rc>=0?'up':'down'}"></i>${Math.abs(rc)}% vs yest</span></div><div class="stat-value">${fmt(tR)}</div><div class="stat-label">Today's Revenue</div></div>
+    <div class="stat-card"><div style="display:flex;align-items:center;justify-content:space-between"><div class="stat-icon blue"><i class="ti ti-receipt"></i></div><span class="stat-change up"><i class="ti ti-trending-up"></i>Today</span></div><div class="stat-value">${tS.length}</div><div class="stat-label">Transactions</div></div>
+    <div class="stat-card"><div style="display:flex;align-items:center;justify-content:space-between"><div class="stat-icon amber"><i class="ti ti-shopping-bag"></i></div></div><div class="stat-value">${fmt(avg)}</div><div class="stat-label">Avg. Order Value</div></div>
+    <div class="stat-card"><div style="display:flex;align-items:center;justify-content:space-between"><div class="stat-icon purple"><i class="ti ti-calendar-month"></i></div><span style="font-size:11px;color:var(--muted)">30 days</span></div><div class="stat-value">${fmt(mR)}</div><div class="stat-label">Monthly Revenue</div></div>
+  </div>
+  <div class="grid-65-35" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Revenue — Last 7 Days</div><div class="card-subtitle">${fmt(last7.reduce((a,d)=>a+d.v,0))} this week</div></div></div>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:120px">
+        ${last7.map(d=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+          <div style="font-size:10px;color:var(--muted)">${d.v>0?Math.round(d.v/1000)+'k':''}</div>
+          <div style="width:100%;background:${d.l===new Date().toLocaleDateString('en-KE',{weekday:'short'})?'var(--green)':'#bbf7d0'};border-radius:4px 4px 0 0;height:${Math.max(4,Math.round((d.v/maxV)*90))}px;transition:.4s"></div>
+          <div style="font-size:11px;color:var(--muted)">${d.l}</div>
         </div>`).join('')}
       </div>
     </div>
-    <div class="card"><div class="card-header"><div class="card-title">Top Selling Products</div></div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Payment Methods</div></div>
+      ${['cash','mpesa','card'].map(m=>{const pct=Math.round((pm[m]||0)/tot*100);return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:700">${m==='mpesa'?'M-Pesa':m[0].toUpperCase()+m.slice(1)}</span><span>${pct}%</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${m==='mpesa'?'#00a651':m==='card'?'var(--blue)':'var(--amber)'}"></div></div></div>`;}).join('')}
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">Total Products</span><strong>${DB.products.length}</strong></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">Total Customers</span><strong>${DB.customers.length}</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Low Stock Items</span><strong style="color:var(--red)">${lowS.length}</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-65-35">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Recent Transactions</div><button class="btn btn-secondary btn-sm" onclick="nav('transactions')">View All</button></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>#</th><th>Product</th><th>Units Sold</th><th>Revenue</th><th>Performance</th></tr></thead>
-        <tbody>${top.map((p,i)=>`<tr><td style="font-weight:700;color:var(--muted)">${i+1}</td><td style="font-weight:600">${p.name}</td><td>${p.qty}</td>
-          <td style="font-weight:700;color:var(--green)">${fmt(p.rev)}</td>
-          <td style="width:120px"><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(p.rev/top[0].rev*100)}%"></div></div></td>
+        <thead><tr><th>Receipt</th><th>Payment</th><th>Amount</th><th>Time</th><th></th></tr></thead>
+        <tbody>${recent.map(s=>`<tr>
+          <td><span style="font-family:monospace;font-size:11px;font-weight:700">${s.receiptNo}</span></td>
+          <td><span class="badge badge-${s.paymentMethod==='mpesa'?'mpesa':s.paymentMethod==='card'?'blue':'gray'}">${s.paymentMethod==='mpesa'?'M-Pesa':s.paymentMethod[0].toUpperCase()+s.paymentMethod.slice(1)}</span></td>
+          <td style="font-weight:700;color:var(--green)">${fmt(s.total)}</td>
+          <td style="color:var(--muted);font-size:12px">${fmtTime(s.date)}</td>
+          <td><button class="btn btn-secondary btn-sm btn-icon" data-viewsale="${s.id}"><i class="ti ti-eye"></i></button></td>
         </tr>`).join('')}</tbody>
       </table></div>
-    </div>`;
-  },
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">⚠️ Low Stock Alerts</div><span class="badge badge-${lowS.length>0?'red':'green'}">${lowS.length}</span></div>
+      ${lowS.length===0?`<div class="empty-state" style="padding:20px"><i class="ti ti-check" style="font-size:28px;color:var(--green);display:block;margin-bottom:8px"></i><p>All stock is healthy</p></div>`:
+      lowS.slice(0,6).map(p=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9">
+        <span style="font-size:20px">${p.emoji}</span>
+        <div style="flex:1"><div style="font-size:12px;font-weight:700">${p.name}</div>
+        <div class="progress-bar" style="margin-top:3px"><div class="progress-fill" style="width:${Math.min(100,Math.round(p.stock/p.minStock*100))}%;background:${p.stock===0?'#ef4444':p.stock<p.minStock/2?'#f59e0b':'#16a34a'}"></div></div></div>
+        <span class="badge badge-${p.stock===0?'red':'amber'}">${p.stock}</span>
+      </div>`).join('')}
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="card-header"><div class="card-title">🏆 Top Selling Products</div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>Product</th><th>Units Sold</th><th>Revenue</th><th>Performance</th></tr></thead>
+      <tbody>${top.map((p,i)=>`<tr><td style="font-weight:800;color:var(--muted)">${i+1}</td><td style="font-weight:700">${p.name}</td><td>${p.qty.toLocaleString()}</td><td style="font-weight:800;color:var(--green)">${fmt(p.rev)}</td><td style="width:140px"><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(p.rev/top[0].rev*100)}%;background:var(--green)"></div></div></td></tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
+}
 
-  transactions(){
-    const sorted=[...DB.sales].sort((a,b)=>new Date(b.date)-new Date(a.date));
-    const filtered=sorted.filter(s=>!S.searchTerm||s.receiptNo.toLowerCase().includes(S.searchTerm.toLowerCase()));
-    return `<div class="section-header"><div class="section-title">All Transactions (${sorted.length})</div>
-      <div class="search-bar"><i class="ti ti-search"></i><input type="text" id="txSearch" placeholder="Search receipt #..." value="${S.searchTerm}" style="width:220px"/></div>
-    </div>
-    <div class="card"><div class="table-wrap"><table>
-      <thead><tr><th>Receipt #</th><th>Date & Time</th><th>Items</th><th>Payment</th><th>Cashier</th><th>Total</th><th>Action</th></tr></thead>
-      <tbody>${filtered.slice(0,60).map(s=>`<tr>
-        <td><span style="font-family:monospace;font-weight:700">${s.receiptNo}</span></td>
-        <td style="color:var(--muted)">${fmtDT(s.date)}</td>
-        <td>${s.items.length} item${s.items.length!==1?'s':''}</td>
-        <td><span class="badge badge-${s.paymentMethod==='mpesa'?'green':s.paymentMethod==='card'?'blue':'gray'}">${s.paymentMethod==='mpesa'?'M-Pesa':s.paymentMethod}</span></td>
-        <td>${s.cashier}</td>
-        <td style="font-weight:700;color:var(--green)">${fmt(s.total)}</td>
-        <td><button class="btn btn-secondary btn-sm" data-vs="${s.id}"><i class="ti ti-eye"></i> View</button></td>
-      </tr>`).join('')}</tbody>
-    </table></div></div>`;
-  },
-
-  products(){
-    const f=DB.products.filter(p=>(!S.searchTerm||p.name.toLowerCase().includes(S.searchTerm.toLowerCase())||p.sku.toLowerCase().includes(S.searchTerm.toLowerCase()))&&(!S.prodCatFilter||p.category===S.prodCatFilter));
-    return `<div class="section-header"><div class="section-title">Products (${DB.products.length})</div>
-      <div style="display:flex;gap:10px">
-        <select class="form-control" id="pCatF" style="width:160px">
-          <option value="0">All Categories</option>${DB.categories.map(c=>`<option value="${c.id}"${S.prodCatFilter===c.id?' selected':''}>${c.name}</option>`).join('')}
-        </select>
-        <div class="search-bar"><i class="ti ti-search"></i><input type="text" id="prodSearch" placeholder="Search products..." value="${S.searchTerm}" style="width:200px"/></div>
-        <button class="btn btn-primary" id="addProdBtn"><i class="ti ti-plus"></i> Add Product</button>
-      </div>
-    </div>
-    <div class="card"><div class="table-wrap"><table>
-      <thead><tr><th>Product</th><th>SKU</th><th>Category</th><th>Buy</th><th>Sell</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody>${f.map(p=>{const cat=DB.categories.find(c=>c.id===p.category);return `<tr>
-        <td><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">${p.emoji}</span><div><div style="font-weight:600">${p.name}</div><div style="font-size:11px;color:var(--muted)">${p.barcode}</div></div></div></td>
-        <td style="font-family:monospace;font-size:12px">${p.sku}</td>
-        <td>${cat?`<span class="badge badge-blue">${cat.icon} ${cat.name}</span>`:'-'}</td>
-        <td>${fmt(p.buyPrice)}</td><td style="font-weight:700;color:var(--green)">${fmt(p.sellPrice)}</td>
-        <td><span class="badge badge-${p.stock===0?'red':p.stock<=p.minStock?'amber':'green'}">${p.stock}</span></td>
-        <td><span class="badge badge-${p.active?'green':'gray'}">${p.active?'Active':'Inactive'}</span></td>
-        <td><div style="display:flex;gap:6px">
-          <button class="btn btn-secondary btn-sm btn-icon" data-ep="${p.id}"><i class="ti ti-edit"></i></button>
-          <button class="btn btn-danger btn-sm btn-icon" data-dp="${p.id}"><i class="ti ti-trash"></i></button>
-        </div></td>
-      </tr>`;}).join('')}</tbody>
-    </table></div></div>`;
-  },
-
-  inventory(){
-    const low=DB.products.filter(p=>p.stock<=p.minStock);
-    return `<div class="stats-grid">
-      <div class="stat-card"><div class="stat-icon green"><i class="ti ti-boxes"></i></div><div class="stat-value">${DB.products.length}</div><div class="stat-label">Total Products</div></div>
-      <div class="stat-card"><div class="stat-icon amber"><i class="ti ti-alert-triangle"></i></div><div class="stat-value">${low.length}</div><div class="stat-label">Low Stock Items</div></div>
-      <div class="stat-card"><div class="stat-icon red"><i class="ti ti-x"></i></div><div class="stat-value">${DB.products.filter(p=>p.stock===0).length}</div><div class="stat-label">Out of Stock</div></div>
-      <div class="stat-card"><div class="stat-icon blue"><i class="ti ti-currency-dollar"></i></div><div class="stat-value">${fmt(DB.products.reduce((a,p)=>a+p.buyPrice*p.stock,0))}</div><div class="stat-label">Inventory Value</div></div>
-    </div>
-    ${low.length?`<div class="alert alert-warning"><i class="ti ti-alert-triangle"></i><strong>Low Stock:</strong> ${low.map(p=>p.name).slice(0,4).join(', ')}${low.length>4?` +${low.length-4} more`:''}</div>`:''}
-    <div class="section-header"><div class="section-title">Stock Levels</div>
-      <button class="btn btn-primary" id="stockAdjBtn"><i class="ti ti-plus"></i> Stock Adjustment</button>
-    </div>
-    <div class="card"><div class="table-wrap"><table>
-      <thead><tr><th>Product</th><th>Stock</th><th>Min Stock</th><th>Status</th><th>Stock Value</th><th>Action</th></tr></thead>
-      <tbody>${DB.products.map(p=>`<tr>
-        <td><div style="display:flex;align-items:center;gap:8px"><span>${p.emoji}</span><span style="font-weight:600">${p.name}</span></div></td>
-        <td><strong>${p.stock}</strong> units</td><td>${p.minStock} units</td>
-        <td><span class="badge badge-${p.stock===0?'red':p.stock<=p.minStock?'amber':'green'}">${p.stock===0?'Out of Stock':p.stock<=p.minStock?'Low Stock':'In Stock'}</span></td>
-        <td>${fmt(p.buyPrice*p.stock)}</td>
-        <td><button class="btn btn-secondary btn-sm" data-as="${p.id}"><i class="ti ti-adjustments"></i> Adjust</button></td>
-      </tr>`).join('')}</tbody>
-    </table></div></div>`;
-  },
-
-  suppliers(){
-    return `<div class="section-header"><div class="section-title">Suppliers (${DB.suppliers.length})</div>
-      <button class="btn btn-primary" id="addSupBtn"><i class="ti ti-plus"></i> Add Supplier</button>
-    </div>
-    <div class="grid-2">${DB.suppliers.map(s=>`<div class="card">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-        <div class="stat-icon blue" style="width:44px;height:44px;font-size:20px"><i class="ti ti-building-store"></i></div>
-        <div><div style="font-size:15px;font-weight:700">${s.name}</div><span class="badge badge-blue">${s.category}</span></div>
-        <div style="margin-left:auto"><span class="badge badge-${s.active?'green':'gray'}">${s.active?'Active':'Inactive'}</span></div>
-      </div>
-      <div style="font-size:13px;display:grid;gap:6px">
-        <div><span style="color:var(--muted)">Contact: </span><strong>${s.contact}</strong></div>
-        <div><span style="color:var(--muted)">Phone: </span><strong>${s.phone}</strong></div>
-        <div><span style="color:var(--muted)">Email: </span><span style="color:var(--blue)">${s.email}</span></div>
-      </div>
-    </div>`).join('')}</div>`;
-  },
-
-  customers(){
-    const f=DB.customers.filter(c=>!S.customerSearch||c.name.toLowerCase().includes(S.customerSearch.toLowerCase())||c.phone.includes(S.customerSearch));
-    const total=DB.customers.reduce((a,c)=>a+c.totalSpent,0);
-    return `<div class="stats-grid">
-      <div class="stat-card"><div class="stat-icon blue"><i class="ti ti-users"></i></div><div class="stat-value">${DB.customers.length}</div><div class="stat-label">Total Customers</div></div>
-      <div class="stat-card"><div class="stat-icon green"><i class="ti ti-currency-dollar"></i></div><div class="stat-value">${fmt(total)}</div><div class="stat-label">Total Revenue</div></div>
-      <div class="stat-card"><div class="stat-icon amber"><i class="ti ti-star"></i></div><div class="stat-value">${DB.customers.reduce((a,c)=>a+c.points,0).toLocaleString()}</div><div class="stat-label">Total Points</div></div>
-      <div class="stat-card"><div class="stat-icon purple"><i class="ti ti-shopping-bag"></i></div><div class="stat-value">${fmt(Math.round(total/Math.max(DB.customers.length,1)))}</div><div class="stat-label">Avg Spend</div></div>
-    </div>
-    <div class="section-header"><div class="section-title">Customers</div>
-      <div style="display:flex;gap:10px">
-        <div class="search-bar"><i class="ti ti-search"></i><input type="text" id="custSearch" placeholder="Search..." value="${S.customerSearch}" style="width:200px"/></div>
-        <button class="btn btn-primary" id="addCustBtn"><i class="ti ti-plus"></i> Add Customer</button>
-      </div>
-    </div>
-    <div class="card"><div class="table-wrap"><table>
-      <thead><tr><th>Customer</th><th>Phone</th><th>Loyalty Points</th><th>Total Spent</th><th>Transactions</th><th>Joined</th></tr></thead>
-      <tbody>${f.map(c=>`<tr>
-        <td><div style="display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green-dark)">${c.name.split(' ').map(n=>n[0]).join('')}</div>
-          <div><div style="font-weight:600">${c.name}</div><div style="font-size:11px;color:var(--muted)">${c.email}</div></div>
-        </div></td>
-        <td>${c.phone}</td>
-        <td><span class="badge badge-amber"><i class="ti ti-star"></i> ${c.points}</span></td>
-        <td style="font-weight:700;color:var(--green)">${fmt(c.totalSpent)}</td>
-        <td>${c.transactions}</td>
-        <td style="color:var(--muted)">${fmtDate(c.joined)}</td>
-      </tr>`).join('')}</tbody>
-    </table></div></div>`;
-  },
-
-  employees(){
-    const rc={admin:'purple',manager:'blue',cashier:'green'};
-    return `<div class="section-header"><div class="section-title">Employees (${DB.users.length})</div>
-      <button class="btn btn-primary" id="addEmpBtn"><i class="ti ti-plus"></i> Add Employee</button>
-    </div>
-    <div class="grid-3" style="margin-bottom:20px">${DB.users.map(u=>`<div class="card">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-        <div style="width:48px;height:48px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--green-dark)">${u.name.split(' ').map(n=>n[0]).join('')}</div>
-        <div><div style="font-size:15px;font-weight:700">${u.name}</div><span class="badge badge-${rc[u.role]||'gray'}">${u.role}</span></div>
-        <span class="badge badge-${u.active?'green':'red'}" style="margin-left:auto">${u.active?'Active':'Inactive'}</span>
-      </div>
-      <div style="font-size:13px;color:var(--muted)">${u.email}</div>
-    </div>`).join('')}</div>
-    <div class="card"><div class="card-header"><div class="card-title">Activity Log</div></div>
-      ${DB.activityLog.length?`<div class="table-wrap"><table>
-        <thead><tr><th>User</th><th>Action</th><th>Time</th></tr></thead>
-        <tbody>${DB.activityLog.slice(0,20).map(l=>`<tr><td style="font-weight:600">${l.user}</td><td>${l.action}</td><td style="color:var(--muted)">${fmtDT(l.time)}</td></tr>`).join('')}</tbody>
-      </table></div>`:`<div style="text-align:center;padding:24px;color:var(--muted)">No activity yet</div>`}
-    </div>`;
-  },
-
-  reports(){
-    const today=new Date().toDateString();
-    const ts=DB.sales.filter(s=>new Date(s.date).toDateString()===today);
-    const ma=new Date(); ma.setDate(ma.getDate()-30);
-    const ms=DB.sales.filter(s=>new Date(s.date)>=ma);
-    const mr=ms.reduce((a,s)=>a+s.total,0), mc=ms.reduce((a,s)=>a+s.items.reduce((b,i)=>b+i.cost*i.qty,0),0);
-    const pb={cash:0,mpesa:0,card:0}; ms.forEach(s=>{pb[s.paymentMethod]=(pb[s.paymentMethod]||0)+s.total;});
-    const l14=[]; for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ss=DB.sales.filter(s=>new Date(s.date).toDateString()===d.toDateString());l14.push({l:d.toLocaleDateString('en-KE',{day:'2-digit',month:'short'}),rv:ss.reduce((a,s)=>a+s.total,0)});}
-    const mb=Math.max(...l14.map(d=>d.rv))||1;
-    const pm={}; ms.forEach(s=>s.items.forEach(it=>{if(!pm[it.productId])pm[it.productId]={name:it.name,qty:0,rev:0,cost:0};pm[it.productId].qty+=it.qty;pm[it.productId].rev+=it.qty*it.price;pm[it.productId].cost+=it.qty*(it.cost||0);}));
-    return `<div class="stats-grid">
-      <div class="stat-card"><div class="stat-icon green"><i class="ti ti-currency-dollar"></i></div><div class="stat-value">${fmt(ts.reduce((a,s)=>a+s.total,0))}</div><div class="stat-label">Today Revenue</div></div>
-      <div class="stat-card"><div class="stat-icon blue"><i class="ti ti-receipt"></i></div><div class="stat-value">${ts.length}</div><div class="stat-label">Today Transactions</div></div>
-      <div class="stat-card"><div class="stat-icon amber"><i class="ti ti-calendar-month"></i></div><div class="stat-value">${fmt(mr)}</div><div class="stat-label">30-Day Revenue</div></div>
-      <div class="stat-card"><div class="stat-icon purple"><i class="ti ti-trending-up"></i></div><div class="stat-value">${fmt(mr-mc)}</div><div class="stat-label">30-Day Profit</div></div>
-    </div>
-    <div class="grid-65-35" style="margin-bottom:16px">
-      <div class="card"><div class="card-header"><div class="card-title">Daily Revenue — Last 14 Days</div></div>
-        <div style="display:flex;align-items:flex-end;gap:3px;height:160px;padding:0 4px">
-          ${l14.map(d=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-            <div style="width:100%;background:#bbf7d0;border-radius:3px 3px 0 0;height:${Math.max(4,Math.round(d.rv/mb*140))}px"></div>
-            <div style="font-size:10px;color:var(--muted);transform:rotate(-45deg);transform-origin:right;white-space:nowrap">${d.l}</div>
-          </div>`).join('')}
-        </div>
-      </div>
-      <div class="card"><div class="card-header"><div class="card-title">Payment Methods</div></div>
-        ${Object.entries(pb).map(([m,v])=>{const p=Math.round(v/(mr||1)*100);return `<div style="margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:600">${m==='mpesa'?'M-Pesa':m.charAt(0).toUpperCase()+m.slice(1)}</span><span>${p}% • ${fmt(v)}</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${m==='mpesa'?'var(--green)':m==='card'?'var(--blue)':'var(--amber)'}"></div></div>
-        </div>`;}).join('')}
-        <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>Revenue</span><strong>${fmt(mr)}</strong></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>Cost</span><strong style="color:var(--red)">${fmt(mc)}</strong></div>
-          <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:var(--green)"><span>Gross Profit</span><strong>${fmt(mr-mc)}</strong></div>
-        </div>
-      </div>
-    </div>
-    <div class="card"><div class="card-header"><div class="card-title">Product Performance (30 Days)</div></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Product</th><th>Units Sold</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th></tr></thead>
-        <tbody>${Object.values(pm).sort((a,b)=>b.rev-a.rev).slice(0,12).map(p=>{const pr=p.rev-p.cost,mg=p.rev>0?Math.round(pr/p.rev*100):0;return `<tr>
-          <td style="font-weight:600">${p.name}</td><td>${p.qty}</td><td>${fmt(p.rev)}</td>
-          <td style="color:var(--muted)">${fmt(p.cost)}</td>
-          <td style="color:var(--green);font-weight:700">${fmt(pr)}</td>
-          <td><span class="badge badge-${mg>30?'green':mg>15?'amber':'red'}">${mg}%</span></td>
-        </tr>`;}).join('')}</tbody>
-      </table></div>
-    </div>`;
-  },
-
-  settings(){
-    const s=DB.settings;
-    return `<div class="grid-2">
-      <div class="card">
-        <div class="card-header"><div class="card-title">Store Settings</div></div>
-        <div class="form-group"><label class="form-label">Store Name</label><input class="form-control" id="ssN" value="${s.storeName}"/></div>
-        <div class="form-group"><label class="form-label">Address</label><input class="form-control" id="ssA" value="${s.storeAddress}"/></div>
-        <div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="ssP" value="${s.phone}"/></div>
-        <div class="form-group"><label class="form-label">Branch</label><input class="form-control" id="ssB" value="${s.branch}"/></div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Currency</label><input class="form-control" value="${s.currency}" readonly/></div>
-          <div class="form-group"><label class="form-label">VAT Rate (%)</label><input type="number" class="form-control" id="ssT" value="${s.taxRate}"/></div>
-        </div>
-        <button class="btn btn-primary" id="saveSetBtn"><i class="ti ti-check"></i> Save Settings</button>
-      </div>
-      <div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="card-header"><div class="card-title"><i class="ti ti-device-mobile" style="color:#1da462"></i> M-Pesa Configuration</div></div>
-          <div class="alert alert-warning"><i class="ti ti-alert-triangle"></i> Keep your API keys secret. Never share them publicly.</div>
-          <div class="form-group"><label class="form-label">Environment</label>
-            <select class="form-control" id="mpEnv"><option value="sandbox"${MPESA_CONFIG.environment==='sandbox'?' selected':''}>Sandbox (Testing)</option><option value="production"${MPESA_CONFIG.environment==='production'?' selected':''}>Production (Live)</option></select>
-          </div>
-          <div class="form-group"><label class="form-label">Shortcode / Paybill</label><input class="form-control" id="mpSC" value="${MPESA_CONFIG.shortcode}"/></div>
-          <div class="form-group"><label class="form-label">Callback URL</label><input class="form-control" id="mpCB" value="${MPESA_CONFIG.callbackURL}"/></div>
-          <button class="btn btn-primary" id="saveMpBtn"><i class="ti ti-check"></i> Save M-Pesa Config</button>
-        </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">System Info</div></div>
-          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
-            ${[['Version','MiniMart POS v2.1'],['Total Sales',DB.sales.length.toLocaleString()],['Products',DB.products.length],['Customers',DB.customers.length],['M-Pesa',MPESA_CONFIG.environment==='sandbox'?'Sandbox Mode':'LIVE']].map(([l,v])=>`<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">${l}</span><strong>${v}</strong></div>`).join('')}
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }
-};
-
-// ===================== POS PAGE =====================
-function posHTML(){
+// ════════════════════════════════════════════════════
+//  POS
+// ════════════════════════════════════════════════════
+function addToCart(pid){
+  const prod=DB.products.find(p=>p.id===pid);
+  if(!prod||prod.stock<=0)return;
+  const cart=[...S.cart];
+  const idx=cart.findIndex(c=>c.productId===pid);
+  if(idx>=0){if(cart[idx].qty>=prod.stock){notif('Max stock reached','warning');return;}cart[idx]={...cart[idx],qty:cart[idx].qty+1};}
+  else cart.push({productId:pid,name:prod.name,price:prod.sellPrice,cost:prod.buyPrice,qty:1});
+  ss({cart});
+}
+function renderPOS(){
   const cats=[{id:0,name:'All',icon:'🏪'},...DB.categories];
-  const filt=DB.products.filter(p=>{
+  const filtered=DB.products.filter(p=>{
     if(S.posCategory&&p.category!==S.posCategory)return false;
-    if(S.searchTerm&&!p.name.toLowerCase().includes(S.searchTerm.toLowerCase())&&!p.barcode.includes(S.searchTerm))return false;
+    if(S.searchTerm&&!p.name.toLowerCase().includes(S.searchTerm.toLowerCase())&&!p.barcode.includes(S.searchTerm)&&!p.sku.toLowerCase().includes(S.searchTerm.toLowerCase()))return false;
     return p.active&&p.stock>0;
   });
-  const ct=S.cart.reduce((a,i)=>a+i.price*i.qty,0);
-  const disc=Math.min(S.discount||0,ct);
-  const tax=Math.round((ct-disc)*.16/1.16);
-  const tot=ct-disc;
-  const cust=S.selectedCustomer?DB.customers.find(c=>c.id===S.selectedCustomer):null;
-
+  const sub=S.cart.reduce((a,i)=>a+i.price*i.qty,0);
+  const disc=Math.min(S.discount||0,sub);
+  const total=sub-disc;
+  const tax=Math.round(total*.16/1.16);
+  const cust=S.selectedCust?DB.customers.find(c=>c.id===S.selectedCust):null;
+  const change=S.payMethod==='cash'&&S.cashReceived?Math.max(0,Number(S.cashReceived)-total):0;
   return `<div class="pos-layout">
     <div class="pos-products">
-      <div style="display:flex;gap:10px;margin-bottom:10px">
-        <div class="search-bar" style="flex:1"><i class="ti ti-search"></i><input type="text" id="posSearch" placeholder="Search product or scan barcode..." value="${S.searchTerm}"/></div>
-        <button class="btn btn-secondary btn-sm" id="posCustBtn"><i class="ti ti-user"></i> ${cust?cust.name.split(' ')[0]:'Customer'}</button>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div class="search-bar" style="flex:1">
+          <i class="ti ti-search"></i>
+          <input type="text" id="posSearch" placeholder="Search product or scan barcode…" value="${S.searchTerm}" autocomplete="off"/>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="posCustBtn" style="white-space:nowrap">
+          <i class="ti ti-user"></i>${cust?cust.name.split(' ')[0]:'Customer'}
+        </button>
       </div>
-      <div class="chip-bar">${cats.map(c=>`<span class="chip${S.posCategory===c.id?' active':''}" data-pc="${c.id}">${c.icon} ${c.name}</span>`).join('')}</div>
+      <div class="chip-bar">${cats.map(c=>`<span class="chip${S.posCategory===c.id?' active':''}" data-poscat="${c.id}">${c.icon} ${c.name}</span>`).join('')}</div>
       <div class="product-grid">
-        ${filt.map(p=>`<div class="product-card" data-ap="${p.id}">
+        ${filtered.map(p=>`<div class="product-card" data-addprod="${p.id}">
           <div class="product-emoji">${p.emoji}</div>
           <div class="product-name">${p.name}</div>
           <div class="product-price">${fmt(p.sellPrice)}</div>
           <div class="product-stock">Stock: ${p.stock}</div>
         </div>`).join('')}
-        ${filt.length===0?`<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><i class="ti ti-search" style="font-size:32px;display:block;margin-bottom:8px"></i>No products found</div>`:''}
+        ${filtered.length===0?`<div class="empty-state" style="grid-column:1/-1"><i class="ti ti-search" style="font-size:32px;display:block;margin-bottom:8px"></i><p>No products found</p></div>`:''}
       </div>
     </div>
     <div class="pos-cart">
       <div class="cart-header">
-        <div>
-          <div style="font-size:14px;font-weight:700">Shopping Cart (${S.cart.length})</div>
-          ${cust?`<div style="font-size:12px;color:var(--green)"><i class="ti ti-star"></i> ${cust.name} • ${cust.points} pts</div>`:''}
-        </div>
-        <button class="btn btn-icon btn-secondary btn-sm" id="clearCart"><i class="ti ti-trash"></i></button>
+        <div><div style="font-size:14px;font-weight:800">Cart (${S.cart.reduce((a,i)=>a+i.qty,0)} items)</div>
+        ${cust?`<div style="font-size:11px;color:var(--green);margin-top:2px"><i class="ti ti-star"></i> ${cust.name} · ${cust.points} pts</div>`:''}</div>
+        <button class="btn btn-icon btn-secondary btn-sm" id="clearCart" title="Clear cart"><i class="ti ti-trash"></i></button>
       </div>
       <div class="cart-items">
-        ${S.cart.length===0?`<div style="text-align:center;padding:40px 20px;color:var(--muted)"><i class="ti ti-shopping-cart" style="font-size:36px;display:block;margin-bottom:8px"></i>Cart is empty<br><small>Click products to add</small></div>`
+        ${S.cart.length===0?`<div class="empty-state"><i class="ti ti-shopping-cart" style="font-size:32px;display:block;margin-bottom:8px"></i><p>Tap a product to add</p></div>`
         :S.cart.map((item,idx)=>`<div class="cart-item">
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:600">${item.name}</div>
-            <div style="font-size:13px;font-weight:700;color:var(--green)">${fmt(item.price*item.qty)}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-            <button class="btn btn-icon btn-secondary btn-sm" data-rc="${idx}" style="padding:3px;width:18px;height:18px;font-size:10px"><i class="ti ti-x" style="font-size:11px"></i></button>
-            <div style="display:flex;align-items:center;gap:6px">
-              <button class="qty-btn" data-qd="${idx}">-</button>
+          <div style="flex:1;min-width:0">
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-price">${fmt(item.price)} × ${item.qty} = <strong>${fmt(item.price*item.qty)}</strong></div>
+            <div class="qty-ctrl">
+              <button class="qty-btn" data-qdn="${idx}">−</button>
               <span class="qty-val">${item.qty}</span>
-              <button class="qty-btn" data-qu="${idx}">+</button>
+              <button class="qty-btn" data-qup="${idx}">+</button>
             </div>
           </div>
+          <button class="btn btn-icon btn-secondary" data-rmv="${idx}" style="padding:3px;width:20px;height:20px;align-self:flex-start;flex-shrink:0"><i class="ti ti-x" style="font-size:11px"></i></button>
         </div>`).join('')}
       </div>
       <div class="cart-summary">
-        <div class="form-group" style="margin-bottom:10px">
-          <input type="number" class="form-control" id="discInput" placeholder="Discount (KSh)" value="${S.discount||''}"/>
-        </div>
-        <div class="summary-row"><span>Subtotal</span><span>${fmt(ct)}</span></div>
-        <div class="summary-row"><span>Discount</span><span style="color:var(--red)">-${fmt(disc)}</span></div>
+        <input type="number" class="pay-input" id="discInput" placeholder="Discount amount (KSh)" value="${S.discount||''}" style="margin-bottom:6px" />
+        <div class="summary-row"><span>Subtotal</span><span>${fmt(sub)}</span></div>
+        <div class="summary-row"><span>Discount</span><span style="color:var(--red)">−${fmt(disc)}</span></div>
         <div class="summary-row"><span>VAT (16% incl.)</span><span>${fmt(tax)}</span></div>
-        <div class="summary-total"><span>TOTAL</span><span style="color:var(--green)">${fmt(tot)}</span></div>
-        <div style="margin:10px 0 6px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Payment Method</div>
-        <div class="payment-btns">
-          <div class="pay-btn${S.paymentMethod==='cash'?' active':''}" data-pm="cash"><i class="ti ti-banknote"></i>Cash</div>
-          <div class="pay-btn${S.paymentMethod==='mpesa'?' active':''}" data-pm="mpesa"><i class="ti ti-device-mobile"></i>M-Pesa</div>
-          <div class="pay-btn${S.paymentMethod==='card'?' active':''}" data-pm="card"><i class="ti ti-credit-card"></i>Card</div>
+        <div class="summary-total"><span>TOTAL</span><span style="color:var(--green)">${fmt(total)}</span></div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.5px">Payment</div>
+        <div class="pay-btns">
+          <div class="pay-btn${S.payMethod==='cash'?' active':''}" data-pay="cash"><i class="ti ti-banknote"></i>Cash</div>
+          <div class="pay-btn${S.payMethod==='mpesa'?' active':''}" data-pay="mpesa"><i class="ti ti-device-mobile" style="color:${S.payMethod==='mpesa'?'var(--green-dark)':'#00a651'}"></i>M-Pesa</div>
+          <div class="pay-btn${S.payMethod==='card'?' active':''}" data-pay="card"><i class="ti ti-credit-card"></i>Card</div>
         </div>
-        ${S.paymentMethod==='cash'?`<div style="margin-top:8px">
-          <input type="number" class="form-control" id="cashIn" placeholder="Cash received (KSh)" value="${S.cashReceived||''}"/>
-          ${S.cashReceived&&Number(S.cashReceived)>=tot?`<div style="font-size:13px;color:var(--green);font-weight:600;margin-top:6px">Change: ${fmt(Number(S.cashReceived)-tot)}</div>`:''}
-        </div>`:''}
-        ${S.paymentMethod==='mpesa'?`<div style="margin-top:8px">
-          <input type="text" class="form-control" id="mpesaPhone" placeholder="Customer phone e.g. 0712345678" value="${S.mpesaPhone||''}"/>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px"><i class="ti ti-info-circle"></i> STK Push will be sent to this number</div>
-        </div>`:''}
-        <button class="btn btn-primary" id="checkoutBtn" style="width:100%;justify-content:center;margin-top:12px;padding:13px;font-size:15px" ${S.cart.length===0?'disabled':''}>
-          <i class="ti ti-${S.paymentMethod==='mpesa'?'device-mobile':'check'}"></i> ${S.paymentMethod==='mpesa'?'Send M-Pesa Request':'Charge'} ${fmt(tot)}
+        ${S.payMethod==='cash'?`
+          <input type="number" class="pay-input" id="cashInput" placeholder="Cash received (KSh)" value="${S.cashReceived||''}"/>
+          ${change>0?`<div class="change-box"><div class="change-label">Change Due</div><div class="change-amount">${fmt(change)}</div></div>`:''}`:''}
+        ${S.payMethod==='mpesa'?`
+          <div class="mpesa-card">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="mpesa-logo">M-PESA</div>
+              <span style="font-size:11px;opacity:.8">STK Push</span>
+            </div>
+            <input class="mpesa-input" id="mpesaPhone" placeholder="Phone: 07XX XXX XXX" value="${S.mpesaPhone||cust?.phone||''}"/>
+            <button class="mpesa-btn" id="mpesaPushBtn" ${S.mpesaPending?'disabled':''}>
+              ${S.mpesaPending?`<span class="spinner" style="border-top-color:#007a3d;border-color:rgba(0,122,61,.3)"></span> Waiting…`:`📲 Send ${fmt(total)} to Customer`}
+            </button>
+            ${S.mpesaStatus?`<div class="mpesa-status"><i class="ti ${S.mpesaStatus.ok?'ti-check':'S.mpesaStatus.polling?\'ti-clock\':\'ti-alert-circle\''}"></i> ${S.mpesaStatus.msg}</div>`:''}
+          </div>`:''}
+        ${S.payMethod==='card'?`<div class="alert alert-info" style="margin-top:8px"><i class="ti ti-credit-card"></i> Swipe/insert card on the POS terminal, then confirm below.</div>`:''}
+        <button class="btn btn-primary" id="checkoutBtn" style="width:100%;justify-content:center;margin-top:10px;padding:12px;font-size:14px;font-weight:800" ${S.cart.length===0?'disabled':''}>
+          <i class="ti ti-check"></i> Complete Sale — ${fmt(total)}
         </button>
       </div>
     </div>
   </div>`;
 }
 
-// ===================== MODALS =====================
-function modalHTML(){
-  const m=S.modal;
-  if(m.type==='addProd'||m.type==='editProd') return productModalHTML();
-  if(m.type==='viewSale') return viewSaleHTML();
-  if(m.type==='receipt') return receiptHTML();
-  if(m.type==='addCust') return addCustHTML();
-  if(m.type==='selCust') return selCustHTML();
-  if(m.type==='stockAdj') return stockAdjHTML();
-  if(m.type==='addSup') return addSupHTML();
-  if(m.type==='addEmp') return addEmpHTML();
-  if(m.type==='mpesaWait') return mpesaWaitHTML();
-  return '';
+// ════════════════════════════════════════════════════
+//  TRANSACTIONS
+// ════════════════════════════════════════════════════
+function renderTransactions(){
+  const sorted=[...DB.sales].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const filt=sorted.filter(s=>!S.searchTerm||s.receiptNo.toLowerCase().includes(S.searchTerm.toLowerCase()));
+  return `
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat-card"><div class="stat-icon green"><i class="ti ti-receipt"></i></div><div class="stat-value">${sorted.length.toLocaleString()}</div><div class="stat-label">Total Transactions</div></div>
+    <div class="stat-card"><div class="stat-icon blue"><i class="ti ti-currency-dollar"></i></div><div class="stat-value">${fmt(sorted.reduce((a,s)=>a+s.total,0))}</div><div class="stat-label">All-Time Revenue</div></div>
+    <div class="stat-card"><div class="stat-icon amber"><i class="ti ti-shopping-bag"></i></div><div class="stat-value">${fmt(sorted.length>0?Math.round(sorted.reduce((a,s)=>a+s.total,0)/sorted.length):0)}</div><div class="stat-label">Average Order</div></div>
+  </div>
+  <div class="section-header">
+    <div class="section-title">All Transactions</div>
+    <div class="search-bar"><i class="ti ti-search"></i><input type="text" id="txSearch" placeholder="Search receipt…" value="${S.searchTerm}" style="width:210px"/></div>
+  </div>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Receipt</th><th>Date & Time</th><th>Items</th><th>Payment</th><th>Cashier</th><th>Total</th><th></th></tr></thead>
+      <tbody>${filt.slice(0,60).map(s=>`<tr>
+        <td><span style="font-family:monospace;font-weight:700;font-size:11px">${s.receiptNo}</span></td>
+        <td style="color:var(--muted);font-size:12px">${fmtDT(s.date)}</td>
+        <td>${s.items.length}</td>
+        <td><span class="badge badge-${s.paymentMethod==='mpesa'?'mpesa':s.paymentMethod==='card'?'blue':'gray'}">${s.paymentMethod==='mpesa'?'M-Pesa':s.paymentMethod[0].toUpperCase()+s.paymentMethod.slice(1)}</span></td>
+        <td style="font-size:12px">${s.cashier}</td>
+        <td style="font-weight:800;color:var(--green)">${fmt(s.total)}</td>
+        <td><button class="btn btn-secondary btn-sm" data-viewsale="${s.id}"><i class="ti ti-eye"></i> View</button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
 }
 
-function productModalHTML(){
-  const isEdit=S.modal.type==='editProd', p=isEdit?DB.products.find(x=>x.id===S.modal.pid):null;
-  return modal(isEdit?'Edit Product':'Add New Product',`
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Product Name *</label><input class="form-control" id="pN" value="${p?p.name:''}" placeholder="e.g. Coca-Cola 500ml"/></div>
-      <div class="form-group"><label class="form-label">SKU</label><input class="form-control" id="pS" value="${p?p.sku:''}" placeholder="BEV001"/></div>
+// ════════════════════════════════════════════════════
+//  PRODUCTS (with camera/barcode scan)
+// ════════════════════════════════════════════════════
+function renderProducts(){
+  const filt=DB.products.filter(p=>
+    (!S.searchTerm||p.name.toLowerCase().includes(S.searchTerm.toLowerCase())||p.sku.toLowerCase().includes(S.searchTerm.toLowerCase()))&&
+    (!S.prodCatFilter||p.category===S.prodCatFilter));
+  return `
+  <div class="section-header">
+    <div class="section-title">Products (${DB.products.length})</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select class="form-control" id="prodCatFilt" style="width:150px">
+        <option value="0">All Categories</option>
+        ${DB.categories.map(c=>`<option value="${c.id}"${S.prodCatFilter===c.id?' selected':''}>${c.name}</option>`).join('')}
+      </select>
+      <div class="search-bar"><i class="ti ti-search"></i><input type="text" id="prodSearch" placeholder="Search products…" value="${S.searchTerm}" style="width:190px"/></div>
+      <button class="btn btn-secondary" id="scanAddBtn"><i class="ti ti-scan"></i> Scan to Add</button>
+      <button class="btn btn-primary" id="addProdBtn"><i class="ti ti-plus"></i> Add Product</button>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Category</label><select class="form-control" id="pC"><option value="">Select...</option>${DB.categories.map(c=>`<option value="${c.id}"${p&&p.category===c.id?' selected':''}>${c.name}</option>`).join('')}</select></div>
-      <div class="form-group"><label class="form-label">Emoji</label><input class="form-control" id="pE" value="${p?p.emoji:'🛍️'}"/></div>
+  </div>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Product</th><th>SKU</th><th>Category</th><th>Buy</th><th>Sell</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>${filt.map(p=>{const cat=DB.categories.find(c=>c.id===p.category);return`<tr>
+        <td><div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px">${p.emoji}</span><div><div style="font-weight:700">${p.name}</div><div style="font-size:10px;color:var(--muted);font-family:monospace">${p.barcode}</div></div></div></td>
+        <td style="font-family:monospace;font-size:11px;font-weight:700">${p.sku}</td>
+        <td>${cat?`<span class="badge badge-blue">${cat.icon} ${cat.name}</span>`:'-'}</td>
+        <td style="font-size:12px">${fmt(p.buyPrice)}</td>
+        <td style="font-weight:700;color:var(--green)">${fmt(p.sellPrice)}</td>
+        <td><span class="badge badge-${p.stock===0?'red':p.stock<=p.minStock?'amber':'green'}">${p.stock}</span></td>
+        <td><span class="badge badge-${p.active?'green':'gray'}">${p.active?'Active':'Inactive'}</span></td>
+        <td><div style="display:flex;gap:5px">
+          <button class="btn btn-secondary btn-sm btn-icon" data-editprod="${p.id}" title="Edit"><i class="ti ti-edit"></i></button>
+          <button class="btn btn-danger btn-sm btn-icon" data-delprod="${p.id}" title="Delete"><i class="ti ti-trash"></i></button>
+        </div></td>
+      </tr>`;}).join('')}</tbody>
+    </table></div>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════
+//  INVENTORY
+// ════════════════════════════════════════════════════
+function renderInventory(){
+  const lowS=DB.products.filter(p=>p.stock<=p.minStock);
+  const totVal=DB.products.reduce((a,p)=>a+p.buyPrice*p.stock,0);
+  return `
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon green"><i class="ti ti-boxes"></i></div><div class="stat-value">${DB.products.length}</div><div class="stat-label">Total SKUs</div></div>
+    <div class="stat-card"><div class="stat-icon amber"><i class="ti ti-alert-triangle"></i></div><div class="stat-value">${lowS.length}</div><div class="stat-label">Low Stock</div></div>
+    <div class="stat-card"><div class="stat-icon red"><i class="ti ti-x"></i></div><div class="stat-value">${DB.products.filter(p=>p.stock===0).length}</div><div class="stat-label">Out of Stock</div></div>
+    <div class="stat-card"><div class="stat-icon blue"><i class="ti ti-currency-dollar"></i></div><div class="stat-value">${fmt(totVal)}</div><div class="stat-label">Inventory Value</div></div>
+  </div>
+  ${lowS.length>0?`<div class="alert alert-warning"><i class="ti ti-alert-triangle"></i><div><strong>Low Stock Alert:</strong> ${lowS.map(p=>p.name).join(', ')}</div></div>`:''}
+  <div class="section-header"><div class="section-title">Stock Levels</div><button class="btn btn-primary" id="stockAdjBtn"><i class="ti ti-plus"></i> Adjust Stock</button></div>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Product</th><th>Current Stock</th><th>Min Stock</th><th>Stock Level</th><th>Status</th><th>Value</th><th>Action</th></tr></thead>
+      <tbody>${DB.products.map(p=>`<tr>
+        <td><div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">${p.emoji}</span><span style="font-weight:700">${p.name}</span></div></td>
+        <td><strong>${p.stock}</strong> units</td>
+        <td>${p.minStock} units</td>
+        <td style="width:140px"><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,Math.round(p.stock/(p.minStock*2||1)*100))}%;background:${p.stock===0?'#ef4444':p.stock<=p.minStock?'#f59e0b':'#16a34a'}"></div></div></td>
+        <td><span class="badge badge-${p.stock===0?'red':p.stock<=p.minStock?'amber':'green'}">${p.stock===0?'Out of Stock':p.stock<=p.minStock?'Low Stock':'In Stock'}</span></td>
+        <td style="font-size:12px">${fmt(p.buyPrice*p.stock)}</td>
+        <td><button class="btn btn-secondary btn-sm" data-adjstock="${p.id}"><i class="ti ti-adjustments"></i> Adjust</button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>
+  ${DB.invLog.length>0?`<div class="card" style="margin-top:14px">
+    <div class="card-header"><div class="card-title">Adjustment Log</div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Product</th><th>Type</th><th>Qty</th><th>Reason</th><th>Date</th></tr></thead>
+      <tbody>${DB.invLog.slice(0,20).map(l=>`<tr>
+        <td style="font-weight:700">${l.product}</td>
+        <td><span class="badge badge-${l.type==='add'?'green':l.type==='remove'?'red':'blue'}">${l.type==='add'?'+ Stock In':l.type==='remove'?'− Stock Out':'= Set'}</span></td>
+        <td><strong>${l.qty}</strong></td><td style="color:var(--muted);font-size:12px">${l.reason}</td>
+        <td style="color:var(--muted);font-size:11px">${fmtDT(l.date)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>`:''}`;
+}
+
+// ════════════════════════════════════════════════════
+//  SUPPLIERS (admin only)
+// ════════════════════════════════════════════════════
+function renderSuppliers(){
+  return `
+  <div class="section-header"><div class="section-title">Suppliers (${DB.suppliers.length})</div><button class="btn btn-primary" id="addSupBtn"><i class="ti ti-plus"></i> Add Supplier</button></div>
+  <div class="grid-2">${DB.suppliers.map(s=>`<div class="card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div class="stat-icon blue" style="width:42px;height:42px;font-size:18px"><i class="ti ti-building-store"></i></div>
+      <div><div style="font-size:14px;font-weight:800">${s.name}</div><span class="badge badge-blue">${s.category}</span></div>
+      <span class="badge badge-${s.active?'green':'gray'}" style="margin-left:auto">${s.active?'Active':'Inactive'}</span>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Buy Price (KSh) *</label><input type="number" class="form-control" id="pB" value="${p?p.buyPrice:''}"/></div>
-      <div class="form-group"><label class="form-label">Sell Price (KSh) *</label><input type="number" class="form-control" id="pSP" value="${p?p.sellPrice:''}"/></div>
+    <div style="font-size:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
+      <div><span style="color:var(--muted)">Contact: </span><strong>${s.contact}</strong></div>
+      <div><span style="color:var(--muted)">Phone: </span><strong>${s.phone}</strong></div>
+      <div style="grid-column:1/-1"><span style="color:var(--muted)">Email: </span><a href="mailto:${s.email}" style="color:var(--blue)">${s.email}</a></div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Stock</label><input type="number" class="form-control" id="pST" value="${p?p.stock:0}"/></div>
-      <div class="form-group"><label class="form-label">Min Stock Alert</label><input type="number" class="form-control" id="pMS" value="${p?p.minStock:10}"/></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm"><i class="ti ti-edit"></i> Edit</button>
+      <button class="btn btn-secondary btn-sm"><i class="ti ti-file-invoice"></i> Orders</button>
     </div>
-    <div class="form-group"><label class="form-label">Barcode</label><input class="form-control" id="pBC" value="${p?p.barcode:''}"/></div>`,
-  `<button class="btn btn-secondary" id="closeModal2">Cancel</button>
-   <button class="btn btn-primary" id="saveProdBtn"><i class="ti ti-check"></i> ${isEdit?'Update':'Add'} Product</button>`);
+  </div>`).join('')}</div>`;
 }
 
-function viewSaleHTML(){
-  const s=DB.sales.find(x=>x.id===S.modal.sid); if(!s)return '';
-  const c=s.customerId?DB.customers.find(x=>x.id===s.customerId):null;
-  return modal(`Transaction: ${s.receiptNo}`,`
-    <div class="grid-2" style="margin-bottom:16px;gap:10px">
-      <div style="font-size:13px"><span style="color:var(--muted)">Date: </span><strong>${fmtDT(s.date)}</strong></div>
-      <div style="font-size:13px"><span style="color:var(--muted)">Cashier: </span><strong>${s.cashier}</strong></div>
-      <div style="font-size:13px"><span style="color:var(--muted)">Payment: </span><strong>${s.paymentMethod==='mpesa'?'M-Pesa':s.paymentMethod}</strong></div>
-      <div style="font-size:13px"><span style="color:var(--muted)">Customer: </span><strong>${c?c.name:'Walk-in'}</strong></div>
+// ════════════════════════════════════════════════════
+//  CUSTOMERS
+// ════════════════════════════════════════════════════
+function renderCustomers(){
+  const filt=DB.customers.filter(c=>!S.custSearch||c.name.toLowerCase().includes(S.custSearch.toLowerCase())||c.phone.includes(S.custSearch));
+  const totR=DB.customers.reduce((a,c)=>a+c.totalSpent,0);
+  return `
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon blue"><i class="ti ti-users"></i></div><div class="stat-value">${DB.customers.length}</div><div class="stat-label">Total Customers</div></div>
+    <div class="stat-card"><div class="stat-icon green"><i class="ti ti-currency-dollar"></i></div><div class="stat-value">${fmt(totR)}</div><div class="stat-label">Total Revenue</div></div>
+    <div class="stat-card"><div class="stat-icon amber"><i class="ti ti-star"></i></div><div class="stat-value">${DB.customers.reduce((a,c)=>a+c.points,0).toLocaleString()}</div><div class="stat-label">Loyalty Points</div></div>
+    <div class="stat-card"><div class="stat-icon purple"><i class="ti ti-shopping-bag"></i></div><div class="stat-value">${fmt(Math.round(totR/Math.max(DB.customers.length,1)))}</div><div class="stat-label">Avg. Spend</div></div>
+  </div>
+  <div class="section-header"><div class="section-title">Customers</div>
+    <div style="display:flex;gap:8px">
+      <div class="search-bar"><i class="ti ti-search"></i><input type="text" id="custSearch" placeholder="Search…" value="${S.custSearch}" style="width:200px"/></div>
+      <button class="btn btn-primary" id="addCustBtn"><i class="ti ti-plus"></i> Add Customer</button>
     </div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
-      <thead><tr style="background:#f8fafc">${['Product','Qty','Price','Total'].map(h=>`<th style="padding:8px;text-align:${h==='Product'?'left':'right'};font-size:12px;color:var(--muted)">${h}</th>`).join('')}</tr></thead>
-      <tbody>${s.items.map(i=>`<tr>${['','','',''].map((_,ci)=>`<td style="padding:8px;border-bottom:1px solid #f1f5f9;text-align:${ci===0?'left':'right'}">${[i.name,i.qty,fmt(i.price),fmt(i.price*i.qty)][ci]}</td>`).join('')}</tr>`).join('')}</tbody>
-    </table>
-    <div style="max-width:180px;margin-left:auto">
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Subtotal</span><span>${fmt(s.subtotal)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Discount</span><span style="color:var(--red)">-${fmt(s.discount)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span>VAT</span><span>${fmt(s.tax)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;border-top:2px solid var(--border);padding-top:8px"><span>TOTAL</span><span style="color:var(--green)">${fmt(s.total)}</span></div>
-    </div>`,
-  `<button class="btn btn-secondary" id="closeModal2">Close</button>
-   <button class="btn btn-primary" data-pr="${s.id}"><i class="ti ti-printer"></i> Print Receipt</button>`,true);
+  </div>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Customer</th><th>Phone</th><th>Points</th><th>Balance</th><th>Total Spent</th><th>Visits</th><th>Joined</th></tr></thead>
+      <tbody>${filt.map(c=>`<tr>
+        <td><div style="display:flex;align-items:center;gap:10px">
+          <div style="width:30px;height:30px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--green-dark)">${c.name.split(' ').map(n=>n[0]).join('')}</div>
+          <div><div style="font-weight:700">${c.name}</div><div style="font-size:11px;color:var(--muted)">${c.email}</div></div>
+        </div></td>
+        <td style="font-size:12px">${c.phone}</td>
+        <td><span class="badge badge-amber">⭐ ${c.points}</span></td>
+        <td>${c.balance>0?fmt(c.balance):'—'}</td>
+        <td style="font-weight:800;color:var(--green)">${fmt(c.totalSpent)}</td>
+        <td>${c.transactions}</td>
+        <td style="color:var(--muted);font-size:12px">${fmtDate(c.joined)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
 }
 
-function receiptHTML(){
-  const s=S.modal.sale, chg=S.modal.change||0;
-  const c=s.customerId?DB.customers.find(x=>x.id===s.customerId):null;
-  const txt=`================================
-       MINIMART POS SYSTEM      
-================================
-   ${DB.settings.storeName}
-   ${DB.settings.storeAddress}
-   Tel: ${DB.settings.phone}
-================================
-Receipt : ${s.receiptNo}
-Date    : ${fmtDT(s.date)}
-Cashier : ${DB.currentUser.name}
-Customer: ${c?c.name:'Walk-in Customer'}
-================================
-ITEMS:
-${s.items.map(i=>`${i.name}\n  ${i.qty} x KSh ${i.price} = KSh ${i.price*i.qty}`).join('\n')}
-================================
-Subtotal :  KSh ${s.subtotal.toLocaleString()}
-Discount : -KSh ${s.discount.toLocaleString()}
-VAT (16%):  KSh ${s.tax.toLocaleString()}
---------------------------------
-TOTAL    :  KSh ${s.total.toLocaleString()}
-Payment  : ${s.paymentMethod==='mpesa'?'M-Pesa':s.paymentMethod.toUpperCase()}
-${chg>0?`Cash Paid:  KSh ${(s.cashPaid||s.total).toLocaleString()}\nChange   :  KSh ${chg.toLocaleString()}`:''}
-================================
-${c?`Loyalty Points Earned: +${Math.round(s.total*.02)}\nYour Total Points: ${c.points}`:'Join loyalty program today!'}
-================================
-  Thank you for shopping at
-      MiniMart Kenya!
-  Asante Sana — Come Again!
-================================`;
-  return modal('Sale Complete! ✅',`
-    <div class="alert alert-success" style="margin-bottom:16px"><i class="ti ti-check"></i> ${fmt(s.total)} via ${s.paymentMethod==='mpesa'?'M-Pesa':s.paymentMethod} — <strong>${s.receiptNo}</strong></div>
-    ${chg>0?`<div class="alert alert-warning"><i class="ti ti-coins"></i> Change Due: <strong>${fmt(chg)}</strong></div>`:''}
-    <div class="receipt">${txt.trim()}</div>`,
-  `<button class="btn btn-secondary" id="closeModal2"><i class="ti ti-x"></i> Close</button>
-   <button class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer"></i> Print Receipt</button>`);
-}
-
-function addCustHTML(){
-  return modal('Add Customer',`
-    <div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="cN" placeholder="John Doe"/></div>
-    <div class="form-group"><label class="form-label">Phone *</label><input class="form-control" id="cP" placeholder="0712 345 678"/></div>
-    <div class="form-group"><label class="form-label">Email</label><input class="form-control" id="cE" type="email" placeholder="email@example.com"/></div>`,
-  `<button class="btn btn-secondary" id="closeModal2">Cancel</button><button class="btn btn-primary" id="saveCustBtn"><i class="ti ti-check"></i> Add Customer</button>`);
-}
-
-function selCustHTML(){
-  return modal('Select Customer',`
-    <div class="search-bar" style="margin-bottom:12px"><i class="ti ti-search"></i><input type="text" id="cMS" placeholder="Search by name or phone..."/></div>
-    <div id="cList">
-      <div style="padding:10px 0;cursor:pointer;border-bottom:1px solid var(--border);color:var(--muted);font-size:13px" data-sc="0"><i class="ti ti-user"></i> Walk-in Customer</div>
-      ${DB.customers.map(c=>`<div style="padding:10px 0;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px" data-sc="${c.id}">
-        <div style="width:32px;height:32px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green-dark)">${c.name.split(' ').map(n=>n[0]).join('')}</div>
-        <div><div style="font-size:14px;font-weight:600">${c.name}</div><div style="font-size:12px;color:var(--muted)">${c.phone} • ${c.points} pts</div></div>
-      </div>`).join('')}
-    </div>`,
-  `<button class="btn btn-secondary" id="closeModal2">Cancel</button>`);
-}
-
-function stockAdjHTML(){
-  const p=DB.products.find(x=>x.id===S.modal.pid);
-  return modal(`Adjust Stock — ${p?p.name:''}`,`
-    <div class="alert alert-info"><i class="ti ti-info-circle"></i> Current stock: <strong>${p?p.stock:0} units</strong></div>
-    <div class="form-group"><label class="form-label">Adjustment Type</label><select class="form-control" id="aT"><option value="add">Stock In (+)</option><option value="remove">Stock Out (-)</option><option value="set">Set Exact</option></select></div>
-    <div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-control" id="aQ" placeholder="Enter quantity" min="0"/></div>
-    <div class="form-group"><label class="form-label">Reason</label><select class="form-control" id="aR"><option>Purchase / Delivery</option><option>Return from customer</option><option>Damaged goods</option><option>Theft/Loss</option><option>Stock count correction</option></select></div>`,
-  `<button class="btn btn-secondary" id="closeModal2">Cancel</button><button class="btn btn-primary" id="saveStockBtn"><i class="ti ti-check"></i> Adjust Stock</button>`);
-}
-
-function addSupHTML(){
-  return modal('Add Supplier',`
-    <div class="form-group"><label class="form-label">Company Name *</label><input class="form-control" id="sN" placeholder="Company name"/></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Contact Person</label><input class="form-control" id="sC" placeholder="Contact name"/></div>
-      <div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="sP" placeholder="0712 000 000"/></div>
+// ════════════════════════════════════════════════════
+//  EMPLOYEES (admin only)
+// ════════════════════════════════════════════════════
+function renderEmployees(){
+  return `
+  <div class="section-header"><div class="section-title">Employees (${DB.users.length})</div><button class="btn btn-primary" id="addEmpBtn"><i class="ti ti-plus"></i> Add Employee</button></div>
+  <div class="grid-2" style="margin-bottom:20px">${DB.users.map(u=>`<div class="card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--green-dark)">${u.name.split(' ').map(n=>n[0]).join('')}</div>
+      <div><div style="font-size:15px;font-weight:800">${u.name}</div><span class="badge role-${u.role}">${u.role}</span></div>
+      <span class="badge badge-${u.active?'green':'red'}" style="margin-left:auto">${u.active?'Active':'Inactive'}</span>
     </div>
-    <div class="form-group"><label class="form-label">Email</label><input class="form-control" id="sE" type="email" placeholder="orders@company.com"/></div>
-    <div class="form-group"><label class="form-label">Category</label><input class="form-control" id="sCat" placeholder="e.g. Beverages"/></div>`,
-  `<button class="btn btn-secondary" id="closeModal2">Cancel</button><button class="btn btn-primary" id="saveSupBtn"><i class="ti ti-check"></i> Add Supplier</button>`);
-}
-
-function addEmpHTML(){
-  return modal('Add Employee',`
-    <div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="eN" placeholder="Employee name"/></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Email</label><input class="form-control" id="eE" type="email" placeholder="email@example.com"/></div>
-      <div class="form-group"><label class="form-label">Role</label><select class="form-control" id="eR"><option value="cashier">Cashier</option><option value="manager">Manager</option><option value="admin">Admin</option></select></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${u.email}</div>
+    <div style="font-size:11px;color:var(--muted)">Joined ${fmtDate(u.created)}</div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-secondary btn-sm"><i class="ti ti-edit"></i> Edit</button>
+      <button class="btn btn-secondary btn-sm"><i class="ti ti-lock-open"></i> Reset PIN</button>
+      ${u.id===DB.currentUser?.id?'<span class="badge badge-green" style="align-self:center">You</span>':''}
     </div>
-    <div class="form-group"><label class="form-label">PIN (4-6 digits)</label><input type="password" class="form-control" id="ePin" placeholder="••••" maxlength="6"/></div>`,
-  `<button class="btn btn-secondary" id="closeModal2">Cancel</button><button class="btn btn-primary" id="saveEmpBtn"><i class="ti ti-check"></i> Add Employee</button>`);
+  </div>`).join('')}</div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Activity Log</div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>User</th><th>Action</th><th>Time</th></tr></thead>
+      <tbody>${DB.actLog.slice(0,30).map(l=>`<tr><td style="font-weight:700">${l.user}</td><td>${l.action}</td><td style="color:var(--muted);font-size:11px">${fmtDT(l.time)}</td></tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
 }
 
-function mpesaWaitHTML(){
-  const amt=S.modal.amount, phone=S.modal.phone;
-  return modal('M-Pesa Payment',`
-    <div style="text-align:center;padding:20px 10px">
-      <div class="mpesa-modal-icon"><i class="ti ti-device-mobile" style="font-size:28px"></i></div>
-      <h3 style="font-size:16px;font-weight:700;margin-bottom:8px">STK Push Sent!</h3>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:20px">A payment request of <strong>${fmt(amt)}</strong> has been sent to <strong>${phone}</strong>.</p>
-      <div class="alert alert-info" style="text-align:left"><i class="ti ti-info-circle"></i> Ask the customer to check their phone and enter their M-Pesa PIN to complete payment.</div>
-      <div style="margin-top:20px;display:flex;gap:10px;justify-content:center">
-        <button class="btn btn-secondary" id="closeModal2">Cancel</button>
-        <button class="btn btn-primary" id="confirmMpBtn"><i class="ti ti-check"></i> Confirm Payment Received</button>
+// ════════════════════════════════════════════════════
+//  REPORTS (admin only)
+// ════════════════════════════════════════════════════
+function renderReports(){
+  const mo30=new Date();mo30.setDate(mo30.getDate()-30);
+  const mS=DB.sales.filter(s=>new Date(s.date)>=mo30);
+  const mR=mS.reduce((a,s)=>a+s.total,0);
+  const mC=mS.reduce((a,s)=>a+s.items.reduce((b,i)=>b+i.cost*i.qty,0),0);
+  const today=new Date().toDateString();
+  const tS=DB.sales.filter(s=>new Date(s.date).toDateString()===today);
+  const tR=tS.reduce((a,s)=>a+s.total,0);
+  const pay={cash:0,mpesa:0,card:0};mS.forEach(s=>{pay[s.paymentMethod]=(pay[s.paymentMethod]||0)+s.total;});
+  const last14=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toDateString();last14.push({l:d.toLocaleDateString('en-KE',{day:'2-digit',month:'short'}),v:DB.sales.filter(s=>new Date(s.date).toDateString()===ds).reduce((a,s)=>a+s.total,0)});}
+  const maxB=Math.max(...last14.map(d=>d.v))||1;
+  const pm={};mS.forEach(s=>s.items.forEach(it=>{if(!pm[it.productId]){pm[it.productId]={name:it.name,qty:0,rev:0,cost:0};}pm[it.productId].qty+=it.qty;pm[it.productId].rev+=it.qty*it.price;pm[it.productId].cost+=it.qty*(it.cost||0);}));
+  const topP=Object.values(pm).sort((a,b)=>b.rev-a.rev).slice(0,12);
+  return `
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon green"><i class="ti ti-currency-dollar"></i></div><div class="stat-value">${fmt(tR)}</div><div class="stat-label">Today Revenue</div></div>
+    <div class="stat-card"><div class="stat-icon blue"><i class="ti ti-receipt"></i></div><div class="stat-value">${tS.length}</div><div class="stat-label">Today Transactions</div></div>
+    <div class="stat-card"><div class="stat-icon amber"><i class="ti ti-calendar-month"></i></div><div class="stat-value">${fmt(mR)}</div><div class="stat-label">30-Day Revenue</div></div>
+    <div class="stat-card"><div class="stat-icon purple"><i class="ti ti-trending-up"></i></div><div class="stat-value">${fmt(mR-mC)}</div><div class="stat-label">30-Day Profit</div></div>
+  </div>
+  <div class="grid-65-35" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Daily Revenue — Last 14 Days</div>
+        <button class="btn btn-secondary btn-sm" id="exportCSVBtn"><i class="ti ti-download"></i> Export CSV</button></div>
+      <div style="display:flex;align-items:flex-end;gap:3px;height:140px;padding:0 4px;overflow:hidden">
+        ${last14.map(d=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0">
+          <div style="width:100%;background:${d.l===new Date().toLocaleDateString('en-KE',{day:'2-digit',month:'short'})?'var(--green)':'#bbf7d0'};border-radius:2px 2px 0 0;height:${Math.max(3,Math.round((d.v/maxB)*120))}px;transition:.4s"></div>
+          <div style="font-size:8px;color:var(--muted);transform:rotate(-45deg);transform-origin:top right;white-space:nowrap;margin-top:2px">${d.l}</div>
+        </div>`).join('')}
       </div>
-    </div>`,null,true);
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Payment Breakdown</div></div>
+      ${Object.entries(pay).map(([m,v])=>{const pct=Math.round(v/(mR||1)*100);return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:700">${m==='mpesa'?'M-Pesa':m[0].toUpperCase()+m.slice(1)}</span><span>${pct}% · ${fmt(v)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${m==='mpesa'?'#00a651':m==='card'?'var(--blue)':'var(--amber)'}"></div></div></div>`;}).join('')}
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Revenue</span><strong>${fmt(mR)}</strong></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span style="color:var(--red)">Cost of Goods</span><strong style="color:var(--red)">${fmt(mC)}</strong></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;color:var(--green)"><span>Gross Profit</span><span>${fmt(mR-mC)} (${mR>0?Math.round((mR-mC)/mR*100):0}%)</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Product Performance (30 Days)</div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th></tr></thead>
+      <tbody>${topP.map(p=>{const pr=p.rev-p.cost;const mg=p.rev>0?Math.round(pr/p.rev*100):0;return`<tr>
+        <td style="font-weight:700">${p.name}</td><td>${p.qty}</td>
+        <td style="font-weight:700">${fmt(p.rev)}</td>
+        <td style="color:var(--muted)">${fmt(p.cost)}</td>
+        <td style="font-weight:800;color:var(--green)">${fmt(pr)}</td>
+        <td><span class="badge badge-${mg>30?'green':mg>15?'amber':'red'}">${mg}%</span></td>
+      </tr>`;}).join('')}</tbody>
+    </table></div>
+  </div>`;
 }
 
-function modal(title,body,footer,noFooter){
-  return `<div class="modal-overlay" id="mOv">
-    <div class="modal${title.includes('Transaction')||title.includes('M-Pesa Pay')?'':''}" style="${noFooter?'max-width:480px':''}">
-      <div class="modal-header"><div class="modal-title">${title}</div><button class="btn btn-icon btn-secondary btn-sm" id="closeModal"><i class="ti ti-x"></i></button></div>
-      <div class="modal-body">${body}</div>
-      ${footer?`<div class="modal-footer">${footer}</div>`:''}
+// ════════════════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════════════════
+function renderSettings(){
+  const s=DB.settings;
+  return `<div class="grid-2">
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-header"><div class="card-title">Store Settings</div></div>
+        <div class="form-group"><label class="form-label">Store Name</label><input class="form-control" id="sName" value="${s.storeName}"/></div>
+        <div class="form-group"><label class="form-label">Address</label><input class="form-control" id="sAddr" value="${s.storeAddress}"/></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="sPhone" value="${s.phone}"/></div>
+        <div class="form-group"><label class="form-label">Branch</label><input class="form-control" id="sBranch" value="${s.branch}"/></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">Currency</label><input class="form-control" value="${s.currency}" readonly/></div><div class="form-group"><label class="form-label">VAT Rate (%)</label><input type="number" class="form-control" id="sTax" value="${s.taxRate}"/></div></div>
+        <button class="btn btn-primary" id="saveSettBtn"><i class="ti ti-check"></i> Save Settings</button>
+      </div>
+      ${DB.currentUser?.role==='admin'?`<div class="card">
+        <div class="card-header"><div class="card-title" style="display:flex;align-items:center;gap:6px"><span style="color:#00a651;font-weight:900">M</span>-Pesa Config</div></div>
+        <div class="alert alert-warning"><i class="ti ti-alert-triangle"></i> Keep API credentials private. Rotate if exposed.</div>
+        <div class="form-group"><label class="form-label">Consumer Key</label><input class="form-control" value="${MPESA.consumerKey.slice(0,14)}••••••••" readonly/></div>
+        <div class="form-group"><label class="form-label">Shortcode</label><input class="form-control" value="${MPESA.shortcode}"/></div>
+        <div class="form-group"><label class="form-label">Environment</label><select class="form-control"><option>Sandbox (Testing)</option><option>Production (Live)</option></select></div>
+        <button class="btn btn-primary" style="background:#00a651" id="testMpesaBtn"><i class="ti ti-device-mobile"></i> Test Connection</button>
+      </div>`:''}
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-header"><div class="card-title">System Info</div></div>
+        <div style="font-size:13px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Version</span><strong>MiniMart POS v2.0</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Products</span><strong>${DB.products.length}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Customers</span><strong>${DB.customers.length}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Total Sales</span><strong>${DB.sales.length.toLocaleString()}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">M-Pesa</span><strong style="color:#00a651">✓ Configured</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Data Management</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-secondary" id="exportBtn"><i class="ti ti-download"></i> Export Data (JSON)</button>
+          <button class="btn btn-secondary" id="exportCsvBtn2"><i class="ti ti-file-spreadsheet"></i> Export Sales CSV</button>
+          ${DB.currentUser?.role==='admin'?`<button class="btn btn-danger" id="clearSalesBtn"><i class="ti ti-trash"></i> Clear All Sales</button>`:''}
+        </div>
+      </div>
     </div>
   </div>`;
 }
 
-// ===================== EVENT BINDING =====================
-function bindAll(){
-  const $ = id => document.getElementById(id);
-  const close = () => set({modal:null});
+// ════════════════════════════════════════════════════
+//  MODALS
+// ════════════════════════════════════════════════════
+function renderModal(){
+  const m=S.modal;
+  if(m.type==='addProd'||m.type==='editProd')return modalProduct();
+  if(m.type==='viewSale')return modalViewSale();
+  if(m.type==='receipt')return modalReceipt();
+  if(m.type==='addCust')return modalAddCust();
+  if(m.type==='selCust')return modalSelCust();
+  if(m.type==='adjStock')return modalAdjStock();
+  if(m.type==='addSup')return modalAddSup();
+  if(m.type==='addEmp')return modalAddEmp();
+  if(m.type==='scanProd')return modalScanProduct();
+  return '';
+}
+const closeM=()=>ss({modal:null});
 
-  // nav & logout
+function modalProduct(){
+  const isE=S.modal.type==='editProd';
+  const p=isE?DB.products.find(pr=>pr.id===S.modal.pid):null;
+  return `<div class="modal-overlay" id="mOverlay"><div class="modal">
+    <div class="modal-header"><div class="modal-title">${isE?'Edit':'Add New'} Product</div><button class="btn btn-icon btn-secondary btn-sm" id="closeM"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label class="form-label">Name *</label><input class="form-control" id="pName" value="${p?p.name:''}" placeholder="Product name" autofocus/></div><div class="form-group"><label class="form-label">SKU</label><input class="form-control" id="pSku" value="${p?p.sku:''}" placeholder="BEV001"/></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="pCat"><option value="">Select…</option>${DB.categories.map(c=>`<option value="${c.id}"${p&&p.category===c.id?' selected':''}>${c.name}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Emoji</label><input class="form-control" id="pEmoji" value="${p?p.emoji:'🛍️'}"/></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Buy Price (KSh) *</label><input type="number" class="form-control" id="pBuy" value="${p?p.buyPrice:''}"/></div><div class="form-group"><label class="form-label">Sell Price (KSh) *</label><input type="number" class="form-control" id="pSell" value="${p?p.sellPrice:''}"/></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Stock Qty</label><input type="number" class="form-control" id="pStock" value="${p?p.stock:0}"/></div><div class="form-group"><label class="form-label">Min Stock Alert</label><input type="number" class="form-control" id="pMin" value="${p?p.minStock:10}"/></div></div>
+      <div class="form-group"><label class="form-label">Barcode <button type="button" class="btn btn-secondary btn-sm" id="scanBarBtn" style="margin-left:8px"><i class="ti ti-scan"></i> Scan</button></label><input class="form-control" id="pBarcode" value="${p?p.barcode:''}" placeholder="Scan or type barcode"/></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="closeM2">Cancel</button><button class="btn btn-primary" id="saveProdBtn"><i class="ti ti-check"></i> ${isE?'Update':'Add'} Product</button></div>
+  </div></div>`;
+}
+
+function modalViewSale(){
+  const sale=DB.sales.find(s=>s.id===S.modal.sid);
+  if(!sale)return'';
+  const cust=sale.customerId?DB.customers.find(c=>c.id===sale.customerId):null;
+  return `<div class="modal-overlay" id="mOverlay"><div class="modal modal-lg">
+    <div class="modal-header"><div class="modal-title">Transaction: ${sale.receiptNo}</div><button class="btn btn-icon btn-secondary btn-sm" id="closeM"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="grid-2" style="gap:10px;margin-bottom:14px;font-size:13px">
+        <div><span style="color:var(--muted)">Date: </span><strong>${fmtDT(sale.date)}</strong></div>
+        <div><span style="color:var(--muted)">Cashier: </span><strong>${sale.cashier}</strong></div>
+        <div><span style="color:var(--muted)">Payment: </span><strong>${sale.paymentMethod==='mpesa'?'M-Pesa':sale.paymentMethod[0].toUpperCase()+sale.paymentMethod.slice(1)}</strong></div>
+        <div><span style="color:var(--muted)">Customer: </span><strong>${cust?cust.name:'Walk-in'}</strong></div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px">
+        <thead><tr style="background:#f8fafc"><th style="padding:8px;text-align:left;color:var(--muted);font-size:11px">Product</th><th style="padding:8px;text-align:right;color:var(--muted);font-size:11px">Qty</th><th style="padding:8px;text-align:right;color:var(--muted);font-size:11px">Price</th><th style="padding:8px;text-align:right;color:var(--muted);font-size:11px">Total</th></tr></thead>
+        <tbody>${sale.items.map(i=>`<tr><td style="padding:8px;border-bottom:1px solid #f1f5f9">${i.name}</td><td style="padding:8px;text-align:right;border-bottom:1px solid #f1f5f9">${i.qty}</td><td style="padding:8px;text-align:right;border-bottom:1px solid #f1f5f9">${fmt(i.price)}</td><td style="padding:8px;text-align:right;font-weight:700;border-bottom:1px solid #f1f5f9">${fmt(i.price*i.qty)}</td></tr>`).join('')}</tbody>
+      </table>
+      <div style="max-width:200px;margin-left:auto;font-size:13px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>Subtotal</span><span>${fmt(sale.subtotal)}</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>Discount</span><span style="color:var(--red)">−${fmt(sale.discount)}</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span>VAT</span><span>${fmt(sale.tax)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;padding-top:8px;border-top:2px solid var(--border)"><span>TOTAL</span><span style="color:var(--green)">${fmt(sale.total)}</span></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="closeM2">Close</button><button class="btn btn-primary" data-printreceipt="${sale.id}"><i class="ti ti-printer"></i> Print Receipt</button></div>
+  </div></div>`;
+}
+
+function modalReceipt(){
+  const sale=S.modal.sale,cust=sale.customerId?DB.customers.find(c=>c.id===sale.customerId):null,change=S.modal.change||0;
+  const pts=Math.round(sale.total*.02);
+  return `<div class="modal-overlay" id="mOverlay"><div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px"><i class="ti ti-check"></i></span> Sale Complete!</div>
+      <button class="btn btn-icon btn-secondary btn-sm" id="closeM"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      ${change>0?`<div class="change-box" style="margin-bottom:12px"><div class="change-label">💰 Change Due</div><div class="change-amount">${fmt(change)}</div></div>`:''}
+      <div class="receipt-paper">
+        <div class="receipt-header">
+          <div style="font-size:28px;margin-bottom:6px">🛒</div>
+          <h2>${DB.settings.storeName.toUpperCase()}</h2>
+          <p>${DB.settings.storeAddress} · ${DB.settings.phone}</p>
+          <div style="margin-top:10px;background:rgba(255,255,255,.15);border-radius:6px;padding:6px 10px;display:inline-block">
+            <div style="font-size:11px;letter-spacing:1px">RECEIPT</div>
+            <div style="font-size:16px;font-weight:900;letter-spacing:2px">${sale.receiptNo}</div>
+          </div>
+        </div>
+        <div class="receipt-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--muted);margin-bottom:10px">
+            <div>📅 ${fmtDate(sale.date)}</div><div>⏰ ${fmtTime(sale.date)}</div>
+            <div>👤 ${DB.currentUser.name}</div><div>💳 ${sale.paymentMethod==='mpesa'?'M-Pesa':sale.paymentMethod[0].toUpperCase()+sale.paymentMethod.slice(1)}</div>
+            <div style="grid-column:1/-1">🛍️ ${cust?cust.name:'Walk-in Customer'}</div>
+          </div>
+          <hr class="receipt-divider"/>
+          <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">ITEMS PURCHASED</div>
+          ${sale.items.map(i=>`<div class="receipt-item" style="border-bottom:1px solid #f1f5f9;padding-bottom:4px;margin-bottom:4px"><div><div style="font-weight:700;font-size:12px">${i.name}</div><div style="font-size:11px;color:var(--muted)">${i.qty} × ${fmt(i.price)}</div></div><div style="font-weight:800;font-size:13px">${fmt(i.price*i.qty)}</div></div>`).join('')}
+          <hr class="receipt-divider"/>
+          <div class="receipt-row"><span style="color:var(--muted)">Subtotal</span><span>${fmt(sale.subtotal)}</span></div>
+          ${sale.discount>0?`<div class="receipt-row"><span style="color:var(--red)">Discount</span><span style="color:var(--red)">−${fmt(sale.discount)}</span></div>`:''}
+          <div class="receipt-row"><span style="color:var(--muted)">VAT (16% incl.)</span><span>${fmt(sale.tax)}</span></div>
+          <hr class="receipt-divider"/>
+          <div class="receipt-total-row"><span>TOTAL PAID</span><span>${fmt(sale.total)}</span></div>
+          ${change>0?`<div class="receipt-row" style="color:var(--green);font-weight:700"><span>Change Given</span><span>${fmt(change)}</span></div>`:''}
+        </div>
+        <div class="receipt-footer">
+          ${cust?`<p>⭐ Loyalty Points Earned: <strong>+${pts}</strong></p><p>Total Points: <strong>${cust.points+pts}</strong></p>`:'<p>Join our loyalty program for rewards!</p>'}
+          <div class="receipt-badge">Thank You — Asante Sana! 🙏</div>
+          <p style="font-size:10px;margin-top:6px;color:var(--green-dark)">Keep this receipt as proof of purchase</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="closeM2"><i class="ti ti-x"></i> New Sale</button><button class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer"></i> Print Receipt</button></div>
+  </div></div>`;
+}
+
+function modalAddCust(){
+  return `<div class="modal-overlay" id="mOverlay"><div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Customer</div><button class="btn btn-icon btn-secondary btn-sm" id="closeM"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="cName" placeholder="e.g. Mary Wanjiku" autofocus/></div>
+      <div class="form-group"><label class="form-label">Phone *</label><input class="form-control" id="cPhone" placeholder="07XX XXX XXX"/></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="cEmail" placeholder="email@example.com"/></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="closeM2">Cancel</button><button class="btn btn-primary" id="saveCustBtn"><i class="ti ti-check"></i> Add Customer</button></div>
+  </div></div>`;
+}
+
+function modalSelCust(){
+  return `<div class="modal-overlay" id="mOverlay"><div class="modal">
+    <div class="modal-header"><div class="modal-title">Select Customer</div><button class="btn btn-icon btn-secondary btn-sm" id="closeM"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body" style="padding-bottom:8px">
+      <div class="search-bar" style="margin-bottom:10px"><i class="ti ti-search"></i><input type="text" id="custMSearch" placeholder="Search name or phone…" autofocus/></div>
+      <div id="custList">
+        <div style="padding:10px 8px;cursor:pointer;border-radius:var(--radius);display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin-bottom:4px" data-selc="0" class="cust-row"><i class="ti ti-user"></i> Walk-in Customer</div>
+        ${DB.customers.map(c=>`<div style="padding:10px 8px;cursor:pointer;border-radius:var(--radius);display:flex;align-items:center;gap:10px;margin-bottom:4px" data-selc="${c.id}" class="cust-row">
+          <div style="width:30px;height:30px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--green-dark);flex-shrink:0">${c.name.split(' ').map(n=>n[0]).join('')}</div>
+          <div><div style="font-size:13px;font-weight:700">${c.name}</div><div style="font-size:11px;color:var(--muted)">${c.phone} · ⭐ ${c.points} pts</div></div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div></div>`;
+}
+
+function modalAdjStock(){
+  const p=DB.products.find(pr=>pr.id===S.modal.pid);
+  return `<div class="modal-overlay" id="mOverlay"><div class="modal">
+    <div class="modal-header"><div class="modal-title">Adjust Stock — ${p?p.name:''}</div><button class="btn btn-icon btn-secondary btn-sm" id="closeM"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="alert alert-info"><i class="ti ti-info-circle"></i> Current stock: <strong>${p?p.stock:0} units</strong></div>
+      <div class="form-group"><label class="form-label">Adjustment Type</label><select class="form-control" id="adjType"><option value="add">Stock In (+)</option><option value="remove">Stock Out (−)</option><option value="set">Set Exact Quantity</option></select></div>
+      <div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-control" id="adjQty" placeholder="Enter quantity" min="0" autofocus/></div>
+      <div class="form-group"><label class="form-label">Reason</label><select class="form-control" id="adjReason"><option>Purchase / Delivery</option><option>Return from customer</option><option>Damaged goods</option><option>Theft / Loss</option><option>Stock count correction</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="closeM2">Cancel</button><button class="btn btn-primary" id="saveAdjBtn"><i class="ti ti-check"></i> Apply Adjustment</button></div>
+  </div></div>`;
+}
+
+function modalAddSup(){
+  return `<div class="modal-overlay" id="mOverlay"><div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Supplier</div><button class="btn btn-icon btn-secondary btn-sm" id="closeM"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Company Name *</label><input class="form-control" id="snName" autofocus/></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Contact Person</label><input class="form-control" id="snContact"/></div><div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="snPhone" placeholder="07XX…"/></div></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="snEmail"/></div>
+      <div class="form-group"><label class="form-label">Category</label><input class="form-control" id="snCat" placeholder="e.g. Beverages"/></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="closeM2">Cancel</button><button class="btn btn-primary" id="saveSupBtn"><i class="ti ti-check"></i> Add Supplier</button></div>
+  </div></div>`;
+}
+
+function modalAddEmp(){
+  return `<div class="modal-overlay" id="mOverlay"><div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Employee</div><button class="btn btn-icon btn-secondary btn-sm" id="closeM"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="eName" autofocus/></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="eEmail"/></div><div class="form-group"><label class="form-label">Role</label><select class="form-control" id="eRole"><option value="cashier">Cashier</option><option value="admin">Admin</option></select></div></div>
+      <div class="form-group"><label class="form-label">PIN (4–6 digits) *</label><input type="password" class="form-control" id="ePin" placeholder="••••" maxlength="6"/></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="closeM2">Cancel</button><button class="btn btn-primary" id="saveEmpBtn"><i class="ti ti-check"></i> Add Employee</button></div>
+  </div></div>`;
+}
+
+function modalScanProduct(){
+  return `<div class="modal-overlay" id="mOverlay"><div class="modal">
+    <div class="modal-header"><div class="modal-title"><i class="ti ti-scan"></i> Barcode / QR Scanner</div><button class="btn btn-icon btn-secondary btn-sm" id="closeM"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="alert alert-info"><i class="ti ti-info-circle"></i> Connect a USB barcode scanner — scanned codes are captured automatically. Or type/paste a barcode below.</div>
+      <div class="scanner-box" id="scannerBox">
+        <div class="scanner-corners"></div>
+        <div class="scanner-line"></div>
+        <i class="ti ti-scan" style="font-size:48px;color:rgba(255,255,255,.3)"></i>
+        <p style="font-size:12px;color:rgba(255,255,255,.6)">Scan barcode or type below</p>
+      </div>
+      <div class="form-group" style="margin-top:14px"><label class="form-label">Or enter barcode / SKU manually</label><input class="form-control" id="manualBarcode" placeholder="Type barcode or SKU then press Enter" autofocus/></div>
+      <div id="scanResult" style="margin-top:8px"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="closeM2">Close</button></div>
+  </div></div>`;
+}
+
+// ════════════════════════════════════════════════════
+//  EVENT BINDING
+// ════════════════════════════════════════════════════
+let mpesaPollTimer=null;
+function bind(){
+  // nav & sidebar
   document.querySelectorAll('[data-nav]').forEach(el=>el.onclick=()=>nav(el.dataset.nav));
-  $('logoutBtn')?.addEventListener('click',()=>{DB.currentUser=null;render();});
-  $('qPosBtn')?.addEventListener('click',()=>nav('pos'));
+  document.getElementById('logoutBtn')?.addEventListener('click',()=>{DB.currentUser=null;clearInterval(mpesaPollTimer);render();});
+  document.getElementById('quickPos')?.addEventListener('click',()=>nav('pos'));
+  document.getElementById('collapseBtn')?.addEventListener('click',()=>{DB.sidebarCollapsed=!DB.sidebarCollapsed;render();});
 
   // modal close
-  $('closeModal')?.addEventListener('click',close);
-  $('closeModal2')?.addEventListener('click',close);
-  $('mOv')?.addEventListener('click',e=>{if(e.target.id==='mOv')close();});
+  document.getElementById('closeM')?.addEventListener('click',closeM);
+  document.getElementById('closeM2')?.addEventListener('click',closeM);
+  document.getElementById('mOverlay')?.addEventListener('click',e=>{if(e.target.id==='mOverlay')closeM();});
 
-  // POS
-  $('posSearch')?.addEventListener('input',e=>set({searchTerm:e.target.value}));
-  document.querySelectorAll('[data-pc]').forEach(el=>el.onclick=()=>set({posCategory:parseInt(el.dataset.pc)}));
-  document.querySelectorAll('[data-ap]').forEach(el=>el.onclick=()=>{
-    const p=DB.products.find(x=>x.id===parseInt(el.dataset.ap));
-    if(!p||p.stock<=0)return;
-    const cart=[...S.cart], idx=cart.findIndex(c=>c.productId===p.id);
-    if(idx>=0){if(cart[idx].qty>=p.stock){notify('Max stock reached','warning');return;}cart[idx]={...cart[idx],qty:cart[idx].qty+1};}
-    else cart.push({productId:p.id,name:p.name,price:p.sellPrice,cost:p.buyPrice,qty:1,emoji:p.emoji});
-    set({cart});
+  // search inputs (focused immediately so typing works without clicking)
+  const pS=document.getElementById('posSearch');
+  if(pS){pS.addEventListener('input',e=>ss({searchTerm:e.target.value}));pS.focus();}
+  document.getElementById('txSearch')?.addEventListener('input',e=>ss({searchTerm:e.target.value}));
+  document.getElementById('prodSearch')?.addEventListener('input',e=>ss({searchTerm:e.target.value}));
+  document.getElementById('custSearch')?.addEventListener('input',e=>ss({custSearch:e.target.value}));
+
+  // POS category chips
+  document.querySelectorAll('[data-poscat]').forEach(el=>el.onclick=()=>ss({posCategory:parseInt(el.dataset.poscat)}));
+
+  // Product cat filter
+  document.getElementById('prodCatFilt')?.addEventListener('change',e=>ss({prodCatFilter:parseInt(e.target.value)}));
+
+  // Add to cart
+  document.querySelectorAll('[data-addprod]').forEach(el=>el.onclick=()=>addToCart(parseInt(el.dataset.addprod)));
+
+  // Cart qty controls
+  document.querySelectorAll('[data-qup]').forEach(el=>el.onclick=()=>{
+    const idx=parseInt(el.dataset.qup),cart=[...S.cart];
+    const prod=DB.products.find(p=>p.id===cart[idx].productId);
+    if(cart[idx].qty<(prod?.stock||99)){cart[idx]={...cart[idx],qty:cart[idx].qty+1};ss({cart});}
   });
-  document.querySelectorAll('[data-qu]').forEach(el=>el.onclick=()=>{
-    const idx=parseInt(el.dataset.qu),cart=[...S.cart],p=DB.products.find(x=>x.id===cart[idx].productId);
-    if(cart[idx].qty<(p?p.stock:99)){cart[idx]={...cart[idx],qty:cart[idx].qty+1};set({cart});}
+  document.querySelectorAll('[data-qdn]').forEach(el=>el.onclick=()=>{
+    const idx=parseInt(el.dataset.qdn),cart=[...S.cart];
+    if(cart[idx].qty>1)cart[idx]={...cart[idx],qty:cart[idx].qty-1};else cart.splice(idx,1);ss({cart});
   });
-  document.querySelectorAll('[data-qd]').forEach(el=>el.onclick=()=>{
-    const idx=parseInt(el.dataset.qd),cart=[...S.cart];
-    if(cart[idx].qty>1)cart[idx]={...cart[idx],qty:cart[idx].qty-1};else cart.splice(idx,1);
-    set({cart});
+  document.querySelectorAll('[data-rmv]').forEach(el=>el.onclick=()=>{
+    const cart=[...S.cart];cart.splice(parseInt(el.dataset.rmv),1);ss({cart});
   });
-  document.querySelectorAll('[data-rc]').forEach(el=>el.onclick=()=>{
-    const cart=[...S.cart];cart.splice(parseInt(el.dataset.rc),1);set({cart});
-  });
-  $('clearCart')?.addEventListener('click',()=>set({cart:[],discount:0,selectedCustomer:null,cashReceived:'',mpesaPhone:''}));
-  document.querySelectorAll('[data-pm]').forEach(el=>el.onclick=()=>set({paymentMethod:el.dataset.pm}));
-  $('discInput')?.addEventListener('input',e=>set({discount:parseFloat(e.target.value)||0}));
-  $('cashIn')?.addEventListener('input',e=>set({cashReceived:e.target.value}));
-  $('mpesaPhone')?.addEventListener('input',e=>set({mpesaPhone:e.target.value}));
-  $('posCustBtn')?.addEventListener('click',()=>set({modal:{type:'selCust'}}));
-  document.querySelectorAll('[data-sc]').forEach(el=>el.onclick=()=>{
-    const id=parseInt(el.dataset.sc);
-    set({selectedCustomer:id||null,modal:null});
-    notify(id?`Customer: ${DB.customers.find(c=>c.id===id)?.name}`:'Walk-in customer selected');
+  document.getElementById('clearCart')?.addEventListener('click',()=>ss({cart:[],discount:0,selectedCust:null,mpesaStatus:null,cashReceived:''}));
+
+  // Payment method
+  document.querySelectorAll('[data-pay]').forEach(el=>el.onclick=()=>ss({payMethod:el.dataset.pay,mpesaStatus:null}));
+
+  // Discount & cash — use oninput so every keystroke updates without re-clicking
+  const dI=document.getElementById('discInput');
+  if(dI){dI.addEventListener('input',e=>ss({discount:parseFloat(e.target.value)||0}));dI.addEventListener('focus',e=>e.target.select());}
+  const cI=document.getElementById('cashInput');
+  if(cI){cI.addEventListener('input',e=>ss({cashReceived:e.target.value}));cI.addEventListener('focus',e=>e.target.select());}
+
+  // M-Pesa phone field — keep state silently
+  const mP=document.getElementById('mpesaPhone');
+  if(mP){mP.addEventListener('input',e=>{S.mpesaPhone=e.target.value;});mP.addEventListener('focus',e=>e.target.select());}
+
+  // M-Pesa STK Push
+  document.getElementById('mpesaPushBtn')?.addEventListener('click',async()=>{
+    const phone=(document.getElementById('mpesaPhone')?.value||'').trim();
+    if(!phone){notif('Enter M-Pesa phone number','danger');return;}
+    const sub=S.cart.reduce((a,i)=>a+i.price*i.qty,0);
+    const total=sub-Math.min(S.discount||0,sub);
+    if(total<=0){notif('Cart is empty','danger');return;}
+    ss({mpesaPending:true,mpesaPhone:phone,mpesaStatus:{ok:false,msg:'Sending push to '+phone+'…'}});
+    try{
+      const res=await mpesaSTK(phone,total,'MM'+Date.now());
+      if(res.ResponseCode==='0'){
+        ss({mpesaPending:false,mpesaStatus:{ok:true,msg:'✓ Check your phone and enter M-Pesa PIN!'},mpesaCheckId:res.CheckoutRequestID});
+        notif('M-Pesa prompt sent!','success');
+        // Poll for payment confirmation every 5s
+        clearInterval(mpesaPollTimer);
+        let polls=0;
+        mpesaPollTimer=setInterval(async()=>{
+          if(!S.mpesaCheckId||polls>12){clearInterval(mpesaPollTimer);return;}
+          polls++;
+          try{
+            const q=await mpesaQuery(S.mpesaCheckId);
+            if(q.ResultCode==='0'){
+              clearInterval(mpesaPollTimer);
+              ss({mpesaStatus:{ok:true,msg:'✅ Payment confirmed! Completing sale…'},mpesaCheckId:null});
+              setTimeout(()=>document.getElementById('checkoutBtn')?.click(),800);
+            } else if(q.ResultCode&&q.ResultCode!=='1032'){
+              clearInterval(mpesaPollTimer);
+              ss({mpesaStatus:{ok:false,msg:'Payment failed: '+(q.ResultDesc||'Cancelled')}});
+            } else {
+              ss({mpesaStatus:{ok:false,msg:`⏳ Waiting for payment… (${polls*5}s)`}});
+            }
+          }catch{}
+        },5000);
+      } else {
+        ss({mpesaPending:false,mpesaStatus:{ok:false,msg:'Error: '+(res.errorMessage||res.ResponseDescription||'Failed')}});
+        notif('M-Pesa failed — '+( res.errorMessage||'check credentials'),'danger');
+      }
+    }catch(err){
+      ss({mpesaPending:false,mpesaStatus:{ok:false,msg:'Network error. Ensure backend proxy is set up for CORS.'}});
+      notif('M-Pesa error — see console','danger');
+      console.error('M-Pesa:',err);
+    }
   });
 
   // Checkout
-  $('checkoutBtn')?.addEventListener('click',async()=>{
+  document.getElementById('checkoutBtn')?.addEventListener('click',()=>{
     if(S.cart.length===0)return;
-    const ct=S.cart.reduce((a,i)=>a+i.price*i.qty,0);
-    const disc=Math.min(S.discount||0,ct), tot=ct-disc, tax=Math.round(tot*.16/1.16);
-
-    if(S.paymentMethod==='cash'&&S.cashReceived&&Number(S.cashReceived)<tot){notify('Cash received is less than total','danger');return;}
-
-    if(S.paymentMethod==='mpesa'){
-      const phone=(S.mpesaPhone||'').trim();
-      if(!phone){notify('Enter customer M-Pesa phone number','danger');return;}
-      // Send STK Push
-      const btn=$('checkoutBtn'); if(btn){btn.disabled=true;btn.innerHTML='<span class="mpesa-spinner"></span> Sending STK Push...';}
-      try {
-        const result = await MPesa.stkPush(phone, tot, `MiniMart-${Date.now()}`, 'MiniMart Purchase');
-        if(btn){btn.disabled=false;}
-        if(result.ResponseCode==='0'){
-          set({modal:{type:'mpesaWait',amount:tot,phone,pendingSale:{cart:S.cart,disc,tax,tot,customer:S.selectedCustomer}}});
-          notify('STK Push sent — awaiting customer confirmation','info');
-        } else {
-          notify(`M-Pesa error: ${result.errorMessage||result.CustomerMessage||'Request failed'}`, 'danger');
-        }
-      } catch(err){
-        if(btn){btn.disabled=false;}
-        notify(`M-Pesa connection failed: ${err.message}`,'danger');
-      }
-      return;
-    }
-
-    completeSale(S.cart, disc, tax, tot, S.paymentMethod, S.selectedCustomer, S.cashReceived);
-  });
-
-  // Confirm M-Pesa payment manually
-  $('confirmMpBtn')?.addEventListener('click',()=>{
-    const ps=S.modal.pendingSale;
-    if(ps) completeSale(ps.cart,ps.disc,ps.tax,ps.tot,'mpesa',ps.customer,'');
-  });
-
-  function completeSale(cart,disc,tax,tot,method,custId,cashRec){
-    const now=new Date(), sid=DB.sales.length+1;
-    const sale={id:sid,items:cart.map(i=>({productId:i.productId,name:i.name,qty:i.qty,price:i.price,cost:i.cost})),
-      subtotal:cart.reduce((a,i)=>a+i.price*i.qty,0),discount:disc,tax,total:tot,
-      paymentMethod:method,cashier:DB.currentUser.name,customerId:custId,
-      cashPaid:method==='cash'?Number(cashRec)||tot:tot,
-      date:now.toISOString(),receiptNo:`RCP${String(sid).padStart(5,'0')}`};
-    cart.forEach(item=>{const p=DB.products.find(x=>x.id===item.productId);if(p)p.stock=Math.max(0,p.stock-item.qty);});
-    if(custId){const c=DB.customers.find(x=>x.id===custId);if(c){c.points+=Math.round(tot*.02);c.totalSpent+=tot;c.transactions++;}}
+    const sub=S.cart.reduce((a,i)=>a+i.price*i.qty,0);
+    const disc=Math.min(S.discount||0,sub);
+    const total=sub-disc;
+    const tax=Math.round(total*.16/1.16);
+    if(S.payMethod==='cash'&&S.cashReceived&&Number(S.cashReceived)<total){notif('Cash received is less than total','danger');return;}
+    const now=new Date(),sid=DB.sales.length+1;
+    const sale={id:sid,items:S.cart.map(i=>({productId:i.productId,name:i.name,qty:i.qty,price:i.price,cost:i.cost})),subtotal:sub,discount:disc,tax,total,paymentMethod:S.payMethod,cashier:DB.currentUser.name,customerId:S.selectedCust,date:now.toISOString(),receiptNo:'RCP'+String(sid).padStart(5,'0')};
+    S.cart.forEach(item=>{const p=DB.products.find(p=>p.id===item.productId);if(p)p.stock=Math.max(0,p.stock-item.qty);});
+    if(S.selectedCust){const c=DB.customers.find(c=>c.id===S.selectedCust);if(c){c.points+=Math.round(total*.02);c.totalSpent+=total;c.transactions++;}}
     DB.sales.push(sale);
-    DB.activityLog.unshift({user:DB.currentUser.name,action:`Sale ${sale.receiptNo} — ${fmt(tot)} via ${method==='mpesa'?'M-Pesa':method}`,time:now.toISOString()});
-    const change=method==='cash'&&cashRec?Math.max(0,Number(cashRec)-tot):0;
-    set({cart:[],discount:0,selectedCustomer:null,cashReceived:'',mpesaPhone:'',modal:{type:'receipt',sale,change}});
-    notify(`Sale complete! ${fmt(tot)} via ${method==='mpesa'?'M-Pesa':method}`);
-  }
+    DB.actLog.unshift({user:DB.currentUser.name,action:`Sale ${sale.receiptNo} — ${fmt(total)} via ${sale.paymentMethod}`,time:now.toISOString()});
+    const change=S.payMethod==='cash'&&S.cashReceived?Math.max(0,Number(S.cashReceived)-total):0;
+    clearInterval(mpesaPollTimer);
+    ss({cart:[],discount:0,selectedCust:null,cashReceived:'',mpesaStatus:null,mpesaPhone:'',mpesaCheckId:null,mpesaPending:false,modal:{type:'receipt',sale,change}});
+    notif('Sale complete! '+fmt(total),'success');
+  });
 
-  // Transactions
-  $('txSearch')?.addEventListener('input',e=>set({searchTerm:e.target.value}));
-  document.querySelectorAll('[data-vs]').forEach(el=>el.onclick=()=>set({modal:{type:'viewSale',sid:parseInt(el.dataset.vs)}}));
-  document.querySelectorAll('[data-pr]').forEach(el=>el.onclick=()=>{
-    const s=DB.sales.find(x=>x.id===parseInt(el.dataset.pr));
-    if(s)set({modal:{type:'receipt',sale:s,change:0}});
+  // Customer select (POS)
+  document.getElementById('posCustBtn')?.addEventListener('click',()=>ss({modal:{type:'selCust'}}));
+  document.querySelectorAll('[data-selc]').forEach(el=>{
+    el.style.cssText+='transition:.1s';
+    el.onmouseenter=()=>el.style.background='#f0fdf4';
+    el.onmouseleave=()=>el.style.background='';
+    el.onclick=()=>{const id=parseInt(el.dataset.selc);ss({selectedCust:id||null,modal:null});notif(id?'Customer selected':'Walk-in customer');};
+  });
+  // Customer modal search filter
+  document.getElementById('custMSearch')?.addEventListener('input',e=>{
+    const q=e.target.value.toLowerCase();
+    document.querySelectorAll('.cust-row').forEach(row=>{
+      const txt=row.textContent.toLowerCase();
+      row.style.display=txt.includes(q)?'':'none';
+    });
+  });
+
+  // View sale
+  document.querySelectorAll('[data-viewsale]').forEach(el=>el.onclick=()=>ss({modal:{type:'viewSale',sid:parseInt(el.dataset.viewsale)}}));
+  document.querySelectorAll('[data-printreceipt]').forEach(el=>el.onclick=()=>{
+    const sale=DB.sales.find(s=>s.id===parseInt(el.dataset.printreceipt));
+    if(sale)ss({modal:{type:'receipt',sale,change:0}});
   });
 
   // Products
-  $('prodSearch')?.addEventListener('input',e=>set({searchTerm:e.target.value}));
-  $('pCatF')?.addEventListener('change',e=>set({prodCatFilter:parseInt(e.target.value)}));
-  $('addProdBtn')?.addEventListener('click',()=>set({modal:{type:'addProd'}}));
-  document.querySelectorAll('[data-ep]').forEach(el=>el.onclick=()=>set({modal:{type:'editProd',pid:parseInt(el.dataset.ep)}}));
-  document.querySelectorAll('[data-dp]').forEach(el=>el.onclick=()=>{
-    if(confirm('Delete this product?')){const i=DB.products.findIndex(p=>p.id===parseInt(el.dataset.dp));if(i>=0){DB.products.splice(i,1);render();notify('Product deleted');}}
+  document.getElementById('addProdBtn')?.addEventListener('click',()=>ss({modal:{type:'addProd'}}));
+  document.getElementById('scanAddBtn')?.addEventListener('click',()=>ss({modal:{type:'scanProd'}}));
+  document.querySelectorAll('[data-editprod]').forEach(el=>el.onclick=()=>ss({modal:{type:'editProd',pid:parseInt(el.dataset.editprod)}}));
+  document.querySelectorAll('[data-delprod]').forEach(el=>el.onclick=()=>{
+    if(!window.confirm('Delete "'+DB.products.find(p=>p.id===parseInt(el.dataset.delprod))?.name+'"?'))return;
+    DB.products.splice(DB.products.findIndex(p=>p.id===parseInt(el.dataset.delprod)),1);render();notif('Product deleted');
   });
-  $('saveProdBtn')?.addEventListener('click',()=>{
-    const n=$('pN').value.trim(), b=parseFloat($('pB').value), sp=parseFloat($('pSP').value);
-    if(!n||isNaN(b)||isNaN(sp)){notify('Name, buy & sell price required','danger');return;}
-    const d={name:n,sku:$('pS').value,category:parseInt($('pC').value)||1,emoji:$('pE').value||'🛍️',buyPrice:b,sellPrice:sp,stock:parseInt($('pST').value)||0,minStock:parseInt($('pMS').value)||10,barcode:$('pBC').value,active:true};
-    if(S.modal.type==='editProd'){Object.assign(DB.products.find(p=>p.id===S.modal.pid),d);notify('Product updated!');}
-    else{d.id=DB.products.length+1;DB.products.push(d);notify('Product added!');}
-    set({modal:null});
+  document.getElementById('saveProdBtn')?.addEventListener('click',()=>{
+    const name=document.getElementById('pName').value.trim();
+    const buy=parseFloat(document.getElementById('pBuy').value);
+    const sell=parseFloat(document.getElementById('pSell').value);
+    if(!name||isNaN(buy)||isNaN(sell)){notif('Name, buy & sell price required','danger');return;}
+    const data={name,sku:document.getElementById('pSku').value||'SKU'+Date.now(),category:parseInt(document.getElementById('pCat').value)||1,emoji:document.getElementById('pEmoji').value||'🛍️',buyPrice:buy,sellPrice:sell,stock:parseInt(document.getElementById('pStock').value)||0,minStock:parseInt(document.getElementById('pMin').value)||10,barcode:document.getElementById('pBarcode').value,active:true};
+    if(S.modal.type==='editProd'){Object.assign(DB.products.find(p=>p.id===S.modal.pid),data);notif('Product updated!');}
+    else{data.id=Date.now();DB.products.push(data);notif('Product added!');}
+    ss({modal:null});
   });
+  // Scan barcode in product modal
+  document.getElementById('scanBarBtn')?.addEventListener('click',()=>{
+    const bc=document.getElementById('pBarcode');if(bc)bc.focus();
+    notif('Scanner active — scan barcode now','info');
+  });
+  // Scanner modal barcode input
+  const mb=document.getElementById('manualBarcode');
+  if(mb){mb.addEventListener('keydown',e=>{if(e.key==='Enter'){
+    const code=mb.value.trim();
+    const prod=DB.products.find(p=>p.barcode===code||p.sku.toLowerCase()===code.toLowerCase());
+    const res=document.getElementById('scanResult');
+    if(prod){res.innerHTML=`<div class="alert alert-success"><i class="ti ti-check"></i> Found: <strong>${prod.emoji} ${prod.name}</strong> — ${fmt(prod.sellPrice)} — Stock: ${prod.stock}</div>`;mb.value='';}
+    else{res.innerHTML=`<div class="alert alert-danger"><i class="ti ti-alert-circle"></i> Product not found for: <strong>${code}</strong></div>`;}
+  }});mb.focus();}
 
   // Inventory
-  $('stockAdjBtn')?.addEventListener('click',()=>set({modal:{type:'stockAdj',pid:DB.products[0]?.id}}));
-  document.querySelectorAll('[data-as]').forEach(el=>el.onclick=()=>set({modal:{type:'stockAdj',pid:parseInt(el.dataset.as)}}));
-  $('saveStockBtn')?.addEventListener('click',()=>{
-    const p=DB.products.find(x=>x.id===S.modal.pid), q=parseInt($('aQ').value)||0;
-    if(!p)return;
-    const t=$('aT').value;
-    if(t==='add')p.stock+=q; else if(t==='remove')p.stock=Math.max(0,p.stock-q); else p.stock=q;
-    notify(`Stock updated: ${p.name} → ${p.stock} units`);
-    set({modal:null});
+  document.getElementById('stockAdjBtn')?.addEventListener('click',()=>ss({modal:{type:'adjStock',pid:DB.products[0]?.id}}));
+  document.querySelectorAll('[data-adjstock]').forEach(el=>el.onclick=()=>ss({modal:{type:'adjStock',pid:parseInt(el.dataset.adjstock)}}));
+  document.getElementById('saveAdjBtn')?.addEventListener('click',()=>{
+    const prod=DB.products.find(p=>p.id===S.modal.pid);
+    const qty=parseInt(document.getElementById('adjQty').value)||0;
+    const type=document.getElementById('adjType').value;
+    if(!prod){notif('Product not found','danger');return;}
+    if(type==='add')prod.stock+=qty;else if(type==='remove')prod.stock=Math.max(0,prod.stock-qty);else prod.stock=qty;
+    DB.invLog.unshift({product:prod.name,qty,type,reason:document.getElementById('adjReason').value,date:new Date().toISOString()});
+    ss({modal:null});notif(`${prod.name}: stock → ${prod.stock} units`);
   });
 
   // Suppliers
-  $('addSupBtn')?.addEventListener('click',()=>set({modal:{type:'addSup'}}));
-  $('saveSupBtn')?.addEventListener('click',()=>{
-    const n=$('sN').value.trim();if(!n){notify('Company name required','danger');return;}
-    DB.suppliers.push({id:DB.suppliers.length+1,name:n,contact:$('sC').value,phone:$('sP').value,email:$('sE').value,category:$('sCat').value,active:true});
-    set({modal:null});notify('Supplier added!');
+  document.getElementById('addSupBtn')?.addEventListener('click',()=>ss({modal:{type:'addSup'}}));
+  document.getElementById('saveSupBtn')?.addEventListener('click',()=>{
+    const name=document.getElementById('snName').value.trim();
+    if(!name){notif('Company name required','danger');return;}
+    DB.suppliers.push({id:Date.now(),name,contact:document.getElementById('snContact').value,phone:document.getElementById('snPhone').value,email:document.getElementById('snEmail').value,category:document.getElementById('snCat').value,active:true});
+    ss({modal:null});notif('Supplier added!');
   });
 
   // Customers
-  $('custSearch')?.addEventListener('input',e=>set({customerSearch:e.target.value}));
-  $('addCustBtn')?.addEventListener('click',()=>set({modal:{type:'addCust'}}));
-  $('saveCustBtn')?.addEventListener('click',()=>{
-    const n=$('cN').value.trim(), p=$('cP').value.trim();
-    if(!n||!p){notify('Name and phone required','danger');return;}
-    DB.customers.push({id:DB.customers.length+1,name:n,phone:p.replace(/^0/,'254'),email:$('cE').value,points:0,balance:0,totalSpent:0,transactions:0,joined:new Date().toISOString().split('T')[0]});
-    set({modal:null});notify('Customer added!');
+  document.getElementById('addCustBtn')?.addEventListener('click',()=>ss({modal:{type:'addCust'}}));
+  document.getElementById('saveCustBtn')?.addEventListener('click',()=>{
+    const name=document.getElementById('cName').value.trim();
+    const phone=document.getElementById('cPhone').value.trim();
+    if(!name||!phone){notif('Name and phone required','danger');return;}
+    DB.customers.push({id:Date.now(),name,phone,email:document.getElementById('cEmail').value,points:0,balance:0,totalSpent:0,transactions:0,joined:new Date().toISOString().split('T')[0]});
+    ss({modal:null});notif('Customer added!');
   });
 
   // Employees
-  $('addEmpBtn')?.addEventListener('click',()=>set({modal:{type:'addEmp'}}));
-  $('saveEmpBtn')?.addEventListener('click',()=>{
-    const n=$('eN').value.trim(), pin=$('ePin').value;
-    if(!n||!pin){notify('Name and PIN required','danger');return;}
-    DB.users.push({id:DB.users.length+1,name:n,email:$('eE').value,role:$('eR').value,pin,active:true,created:new Date().toISOString().split('T')[0]});
-    set({modal:null});notify('Employee added!');
+  document.getElementById('addEmpBtn')?.addEventListener('click',()=>ss({modal:{type:'addEmp'}}));
+  document.getElementById('saveEmpBtn')?.addEventListener('click',()=>{
+    const name=document.getElementById('eName').value.trim();
+    const pin=document.getElementById('ePin').value;
+    if(!name||!pin){notif('Name and PIN required','danger');return;}
+    DB.users.push({id:Date.now(),name,email:document.getElementById('eEmail').value,role:document.getElementById('eRole').value,pin,active:true,created:new Date().toISOString().split('T')[0]});
+    ss({modal:null});notif('Employee added!');
   });
 
   // Settings
-  $('saveSetBtn')?.addEventListener('click',()=>{
-    DB.settings.storeName=$('ssN').value;DB.settings.storeAddress=$('ssA').value;
-    DB.settings.phone=$('ssP').value;DB.settings.branch=$('ssB').value;
-    DB.settings.taxRate=parseFloat($('ssT').value)||16;
-    notify('Settings saved!');
+  document.getElementById('saveSettBtn')?.addEventListener('click',()=>{
+    DB.settings.storeName=document.getElementById('sName').value;
+    DB.settings.storeAddress=document.getElementById('sAddr').value;
+    DB.settings.phone=document.getElementById('sPhone').value;
+    DB.settings.branch=document.getElementById('sBranch').value;
+    DB.settings.taxRate=parseFloat(document.getElementById('sTax').value)||16;
+    notif('Settings saved!');
   });
-  $('saveMpBtn')?.addEventListener('click',()=>{
-    MPESA_CONFIG.environment=$('mpEnv').value;
-    MPESA_CONFIG.shortcode=$('mpSC').value;
-    MPESA_CONFIG.callbackURL=$('mpCB').value;
-    notify('M-Pesa config saved!');
+  document.getElementById('testMpesaBtn')?.addEventListener('click',async()=>{
+    notif('Testing M-Pesa connection…','info');
+    try{const tok=await mpesaToken();if(tok){notif('✓ M-Pesa connection successful!','success');}else{notif('Connection failed — check credentials','danger');}}
+    catch(e){notif('Connection failed: '+e.message,'danger');}
+  });
+  document.getElementById('exportBtn')?.addEventListener('click',()=>{
+    const data={products:DB.products,sales:DB.sales,customers:DB.customers,suppliers:DB.suppliers,exportedAt:new Date().toISOString()};
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+    a.download='minimart-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();notif('Data exported!');
+  });
+  const exportCSV=()=>{
+    const header='Receipt,Date,Items,Payment,Cashier,Total\n';
+    const rows=DB.sales.map(s=>`${s.receiptNo},${fmtDT(s.date)},${s.items.length},${s.paymentMethod},${s.cashier},${s.total}`).join('\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([header+rows],{type:'text/csv'}));
+    a.download='minimart-sales-'+new Date().toISOString().split('T')[0]+'.csv';a.click();notif('CSV exported!');
+  };
+  document.getElementById('exportCSVBtn')?.addEventListener('click',exportCSV);
+  document.getElementById('exportCsvBtn2')?.addEventListener('click',exportCSV);
+  document.getElementById('clearSalesBtn')?.addEventListener('click',()=>{
+    if(window.confirm('Clear ALL sales data? This cannot be undone.')){DB.sales=[];render();notif('Sales data cleared');}
   });
 }
 
+// ════════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════════
 render();
 </script>
 </body>
